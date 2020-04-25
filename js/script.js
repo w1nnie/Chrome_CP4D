@@ -1,9 +1,11 @@
-chrome.extension.onMessage.addListener(function(request, sender, sendResponse){
-    if (request == "Action"){
-        hogehoge();
-    }
-});
+document.body.style.background = 'black';
 
-function hogehoge(){
-    alert("Hello World");
-}
+// chrome.extension.onMessage.addListener(function(request, sender, sendResponse){
+//     if (request == "Action"){
+//         hogehoge();
+//     }
+// });
+
+// function hogehoge(){
+//     alert("Hello World");
+// }

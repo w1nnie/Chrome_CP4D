@@ -12,16 +12,14 @@
     },
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": ["js/script.js"],
-        "css": ["css/style.css"]
+        "js": ["js/script.js"]
     }],
     "background": {
         "scripts": ["js/background.js"]
     },
     "browser_action": {
         "default_icon": "image/48.png",
-        "default_title": "kusa",
-        "default_popup": "html/pop.html"
+        "default_title": "kusa"
     },
     "permissions": [
         "tabs",
