@@ -9,16 +9,18 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     document.body.appendChild(canvas);
 
     let colorInfo = document.createElement('div');
-    colorInfo.style = 'width:200px;height:200px;z-index:10001;position:fixed;top:0;left:0;';
+    colorInfo.style = 'width:200px;height:200px;z-index:10001;position:fixed;';
     document.body.appendChild(colorInfo);
 
     // ポインタの座標から画像のRGBA値を取得
     canvas.addEventListener('mousemove',function(e){
         let mousePos = getMousePosition(e);
         console.log(mousePos);
-        imageData = ctx.getImageData(mousePos.x,mousePos.y,1,1);
-        console.log("R:" + imageData.data[0] + " G:" + imageData.data[1] + " B:" + imageData.data[2] + " A:" + imageData.data[3]);
+        imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
+        // console.log("R:" + imageData.data[0] + " G:" + imageData.data[1] + " B:" + imageData.data[2] + " A:" + imageData.data[3]);
         colorInfo.style.backgroundColor = "rgba(" + imageData.data[0] + "," + imageData.data[1] + "," + imageData.data[2] + "," + imageData.data[3]/255 + ")";
+        colorInfo.style.top = mousePos.y+50 + "px";
+        colorInfo.style.left = mousePos.x+50 + "px";
     })
     
 
@@ -39,8 +41,8 @@ function draw(canvas,imagePath,ctx) {
 // ポインタの座標を取得(retina displayだと2倍(?))
 function getMousePosition(e){
     return {
-        x: parseInt(e.offsetX*window.devicePixelRatio),
-        y: parseInt(e.offsetY*window.devicePixelRatio)
+        x: parseInt(e.offsetX),
+        y: parseInt(e.offsetY)
     };
 }
 
