@@ -1,4 +1,37 @@
-body {
-    width: 500px;
-    height: 300px;
+.screen-shot{
+    overflow: hidden;
+    z-index: 10000;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0px;
+    left: 0px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.mouse-tracker {
+    width: 200px;
+    height: 200px;
+    z-index: 10001;
+    position: fixed;
+}
+
+.color-circles {
+    width: 100px;
+    height: 100px;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background-color: #555;
+    z-index: 10001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hsl {
+    width: 80%;
+    height: 80%;
+    background-color: #eee;
 }
