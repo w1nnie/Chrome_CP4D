@@ -18,7 +18,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorCircles.className = 'color-circles';
     document.body.appendChild(colorCircles);
 
-    drawColorCircle(colorCircles,250);
+    drawColorCircle(colorCircles,400,[]);
     
 
 
@@ -165,7 +165,6 @@ function drawInnerColorCircleHSV(ctx,size,rgba) {
     let center = new Object();
     center.x = size / 2;
     center.y = size / 2;
-    length = size * 0.8;
 
     let hue = 300;
     let quant = size * 0.55; //量子化数
@@ -194,20 +193,47 @@ function drawInnerColorCircleHSV(ctx,size,rgba) {
             }
             ctx.fillStyle = 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')'; 
             // console.log(ctx.fillStyle);
-            ctx.fillRect(i + center.x - quant/2,j + center.y - quant/2,1,1);
+            ctx.fillRect(i + center.x - quant/2,j + center.y - quant/2, 1, 1);
         }
     }
-    ctx.translate(center.x - quant/2, center.y - quant/2);
+}
+
+function drawInnerColorCircleHSL(ctx,size,rgba) {
+    let center = new Object();
+    center.x = size / 2;
+    center.y = size / 2;
+
+    let hue = 200;
+    let quant = size * 0.65;
+    for (let i = 0; i < quant; i++) {
+        jRange = 2 * Math.sin(Math.PI * 1/3) * (- Math.abs(quant/2 - i) + quant/2);
+        for (let j = 0; j < jRange; j++) {
+            // hsl (h, i, )
+            ctx.fillStyle = 'hsl(' + hue + ',' + Math.round(j / jRange * 100) + '%,' + Math.round((quant - i) / quant * 100) + '%)';
+            ctx.fillRect(j + center.x - Math.round(quant * Math.sin(Math.PI * 1/3) / 3), Math.round(i + center.y - quant / 2), 1, 1);
+        }
+    }
 }
 
 function drawColorCircle(el, size, rgba) {
-    let colorCircle = document.createElement('canvas');
-    colorCircle.className = 'color-circle';
-    colorCircle.width = size;
-    colorCircle.height = size;
-    let ctx = colorCircle.getContext('2d');
-    
+    // HSVカラーサークルの描画
+    let colorCircleHSV = document.createElement('canvas');
+    colorCircleHSV.className = 'color-circle';
+    colorCircleHSV.width = size;
+    colorCircleHSV.height = size;
+    let ctx = colorCircleHSV.getContext('2d');
     drawOuterColorCircle(ctx,size);
     drawInnerColorCircleHSV(ctx,size,rgba);
-    el.appendChild(colorCircle);
+    el.appendChild(colorCircleHSV);
+
+    // HSLカラーサークルの描画
+    let colorCircleHSL = document.createElement('canvas');
+    colorCircleHSL.className = 'color-circle';
+    colorCircleHSL.width = size;
+    colorCircleHSL.height = size;
+    ctx = colorCircleHSL.getContext('2d');
+    drawOuterColorCircle(ctx,size);
+    drawInnerColorCircleHSL(ctx,size,rgba);
+    el.appendChild(colorCircleHSL);
+
 }

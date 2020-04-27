@@ -18,19 +18,17 @@
 }
 
 .color-circles {
-    width: 300px;
-    height: 300px;
+    width: 800px;
+    height: 400px;
     position: fixed;
     top: 0px;
     left: 0px;
     background-color: #555;
     z-index: 10001;
     display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
-/* .hue {
+/* .color-circle {
     width: 80%;
     height: 80%;
     background-color: #eee;
