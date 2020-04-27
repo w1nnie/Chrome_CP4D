@@ -18,7 +18,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorCircles.className = 'color-circles';
     document.body.appendChild(colorCircles);
 
-    drawColorCircleHSL(colorCircles);
+    drawColorCircle(colorCircles,250);
     
 
 
@@ -34,10 +34,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
         colorInfo.style.backgroundColor = "rgba(" + imageData.data[0] + "," + imageData.data[1] + "," + imageData.data[2] + "," + imageData.data[3]/255 + ")";
         colorInfo.style.top = mousePos.y+50 + "px";
         colorInfo.style.left = mousePos.x+50 + "px";
-
-
-    })
-    
+    });
 
 }); 
 
@@ -61,20 +58,12 @@ function getMousePosition(e) {
     };
 }
 
-function drawColorCircleHSL(colorCircles) {
-    let hsl = document.createElement('canvas');
-    hsl.className = 'hsl';
-    hsl.width = '250';
-    hsl.height = '250';
-
-    w = parseInt(hsl.width);
-    h = parseInt(hsl.height);
-    let ctx = hsl.getContext('2d');
-    let clock = new Object();
-    clock.x = w / 2;
-    clock.y = h / 2;
+function drawOuterColorCircle(ctx,size) {
+    let center = new Object();
+    center.x = size / 2;
+    center.y = size / 2;
     
-    rad = w/2*0.9;
+    rad = size/2*0.9;
     offsetAngle = Math.PI * 1/16;
     ax = Math.round(Math.cos(Math.PI * 1/3) * rad * 1000) / 1000;
     ay = Math.round(Math.sin(Math.PI * 1/3) * rad * 1000) / 1000;
@@ -82,10 +71,10 @@ function drawColorCircleHSL(colorCircles) {
         {
             "angleStart": Math.PI,
             "angleEnd": Math.PI * 4/3 + 0.01,
-            "x1": clock.x - rad,
-            "y1": clock.y,
-            "x2": clock.x - ax,
-            "y2": clock.y - ay,
+            "x1": center.x - rad,
+            "y1": center.y,
+            "x2": center.x - ax,
+            "y2": center.y - ay,
             "colorStops": [
                 {"stop": 0, "color": "red"},
                 {"stop": 1, "color": "yellow"}
@@ -94,34 +83,34 @@ function drawColorCircleHSL(colorCircles) {
         {
             "angleStart": Math.PI * 4/3,
             "angleEnd": Math.PI * 5/3 + 0.01,
-            "x1": clock.x - ax,
-            "y1": clock.y - ay,
-            "x2": clock.x + ax,
-            "y2": clock.y - ay,
+            "x1": center.x - ax,
+            "y1": center.y - ay,
+            "x2": center.x + ax,
+            "y2": center.y - ay,
             "colorStops": [
                 {"stop": 0, "color": "yellow"},
-                {"stop": 1, "color": "green"}
+                {"stop": 1, "color": "lime"}
             ]
         },
         {
             "angleStart": Math.PI * -1/3,
             "angleEnd": 0 + 0.01,
-            "x1": clock.x + ax,
-            "y1": clock.y - ay,
-            "x2": clock.x + rad,
-            "y2": clock.y,
+            "x1": center.x + ax,
+            "y1": center.y - ay,
+            "x2": center.x + rad,
+            "y2": center.y,
             "colorStops": [
-                {"stop": 0, "color": "green"},
+                {"stop": 0, "color": "lime"},
                 {"stop": 1, "color": "cyan"}
             ]
         },
         {
             "angleStart": 0,
             "angleEnd": Math.PI * 1/3 + 0.01,
-            "x1": clock.x + rad,
-            "y1": clock.y,
-            "x2": clock.x + ax,
-            "y2": clock.y + ay,
+            "x1": center.x + rad,
+            "y1": center.y,
+            "x2": center.x + ax,
+            "y2": center.y + ay,
             "colorStops": [
                 {"stop": 0, "color": "cyan"},
                 {"stop": 1, "color": "blue"}
@@ -130,10 +119,10 @@ function drawColorCircleHSL(colorCircles) {
         {
             "angleStart": Math.PI * 1/3,
             "angleEnd": Math.PI * 2/3 + 0.01,
-            "x1": clock.x + ax,
-            "y1": clock.y + ay,
-            "x2": clock.x - ax,
-            "y2": clock.y + ay,
+            "x1": center.x + ax,
+            "y1": center.y + ay,
+            "x2": center.x - ax,
+            "y2": center.y + ay,
             "colorStops": [
                 {"stop": 0, "color": "blue"},
                 {"stop": 1, "color": "magenta"}
@@ -142,10 +131,10 @@ function drawColorCircleHSL(colorCircles) {
         {
             "angleStart": Math.PI * 2/3,
             "angleEnd": Math.PI + 0.01,
-            "x1": clock.x - ax,
-            "y1": clock.y + ay,
-            "x2": clock.x - rad,
-            "y2": clock.y,
+            "x1": center.x - ax,
+            "y1": center.y + ay,
+            "x2": center.x - rad,
+            "y2": center.y,
             "colorStops": [
                 {"stop": 0, "color": "magenta"},
                 {"stop": 1, "color": "red"}
@@ -161,16 +150,64 @@ function drawColorCircleHSL(colorCircles) {
             grad.addColorStop(cs.stop, cs.color);
         }
         ctx.beginPath();
-        console.log(clock.x, clock.y, rad, tri.angleStart, tri.angleEnd);
-        ctx.arc(clock.x, clock.y, rad, tri.angleStart, tri.angleEnd);
+        console.log(center.x, center.y, rad, tri.angleStart, tri.angleEnd);
+        ctx.arc(center.x, center.y, rad, tri.angleStart, tri.angleEnd);
         ctx.strokeStyle = grad;
-        ctx.lineWidth = w/20;
-        // ctx.translate(clock.x,clock.y);
+        ctx.lineWidth = size/15;
+        // ctx.translate(center.x,center.y);
         // ctx.rotate(offsetAngle);
-        // ctx.translate(-clock.x,-clock.y);
+        // ctx.translate(-center.x,-center.y);
         ctx.stroke();
-
     }
+}
 
-    colorCircles.appendChild(hsl);
+function drawInnerColorCircleHSV(ctx,size,rgba) {
+    let center = new Object();
+    center.x = size / 2;
+    center.y = size / 2;
+    length = size * 0.8;
+
+    let hue = 300;
+    let quant = size * 0.55; //量子化数
+    for (let i = 0; i < quant; i++) {
+        for (let j = 0; j < quant; j++) {
+            // hsv (h, i. quant-1-j)
+            h = (hue / 60) % 1
+            A = (quant - 1 - j)/quant * 255;
+            B = (quant - 1 - j)/quant * (1 - i/quant) * 255;
+            C = (quant - 1 - j)/quant * (1 - i/quant * h) * 255;
+            D = (quant - 1 - j)/quant * (1 - i/quant * (1 - h)) * 255;
+            if (i == 0) {
+                r = A; g = A; b = A;
+            } else if (hue < 60) {
+                r = A, g = D, b = B;
+            } else if (hue < 120) {
+                r = C, g = A, b = B;
+            } else if (hue < 180) {
+                r = B, g = A. b = D;
+            } else if (hue < 240) {
+                r = B, g = C, g = A;
+            } else if (hue < 300) {
+                r = D, g = B, g = A;
+            } else {
+                r = A, g = B, b = C;
+            }
+            ctx.fillStyle = 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')'; 
+            // console.log(ctx.fillStyle);
+            ctx.fillRect(i + center.x - quant/2,j + center.y - quant/2,1,1);
+        }
+    }
+    ctx.translate(center.x - quant/2, center.y - quant/2);
+}
+
+function drawColorCircle(el, size, rgba) {
+    let colorCircle = document.createElement('canvas');
+    colorCircle.className = 'color-circle';
+    colorCircle.width = size;
+    colorCircle.height = size;
+    let ctx = colorCircle.getContext('2d');
+    
+    drawOuterColorCircle(ctx,size);
+    drawInnerColorCircleHSV(ctx,size,rgba);
+    el.appendChild(colorCircle);
 }
