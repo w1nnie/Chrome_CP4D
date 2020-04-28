@@ -15,11 +15,12 @@
     height: 200px;
     z-index: 10001;
     position: fixed;
+    pointer-events: none;
 }
 
 .color-circles {
-    width: 800px;
-    height: 400px;
+    width: 100px;
+    height: 100px;
     position: fixed;
     top: 0px;
     left: 0px;

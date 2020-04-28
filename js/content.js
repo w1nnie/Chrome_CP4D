@@ -18,24 +18,36 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorCircles.className = 'color-circles';
     document.body.appendChild(colorCircles);
 
-    drawColorCircle(colorCircles,400,[]);
     
+    let colorCircleHSV = document.createElement('canvas');
+    colorCircleHSV.className = 'color-circle';
+    size = 100;
+    colorCircleHSV.width = size;
+    colorCircleHSV.height = size;
+    colorCircles.appendChild(colorCircleHSV);
 
 
-
+    // let colorCircleHSL = document.createElement('canvas');
+    // colorCircleHSL.className = 'color-circle';
+    // colorCircleHSL.width = size;
+    // colorCircleHSL.height = size;
 
     // mousemoveを検知してimageDataを取得、処理
-    canvas.addEventListener('mousemove',function(e) {
+    canvas.addEventListener('mousemove',_.debounce(function(e) {
         let mousePos = getMousePosition(e);
-        console.log(mousePos);
+        // console.log(mousePos);
         imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
         // console.log("R:" + imageData.data[0] + " G:" + imageData.data[1] + " B:" + imageData.data[2] + " A:" + imageData.data[3]);
 
         colorInfo.style.backgroundColor = "rgba(" + imageData.data[0] + "," + imageData.data[1] + "," + imageData.data[2] + "," + imageData.data[3]/255 + ")";
-        colorInfo.style.top = mousePos.y+50 + "px";
-        colorInfo.style.left = mousePos.x+50 + "px";
-    });
+        colorInfo.style.top = mousePos.y+30 + "px";
+        colorInfo.style.left = mousePos.x+30 + "px";
 
+        let ctx2 = colorCircleHSV.getContext('2d');
+        drawColorCircle(ctx2,size,imageData.data);
+    },40));
+
+    // el.appendChild(colorCircleHSL);
 }); 
 
 // canvasに画像を表示
@@ -143,14 +155,14 @@ function drawOuterColorCircle(ctx,size) {
     ]
     for (let i = 0; i < trirants.length; i++) {
         let tri = trirants[i];
-        console.log(tri.x1 + ", " + tri.y1 + ", " + tri.x2 + ", " + tri.y2);
+        // console.log(tri.x1 + ", " + tri.y1 + ", " + tri.x2 + ", " + tri.y2);
         let grad = ctx.createLinearGradient(tri.x1, tri.y1, tri.x2, tri.y2);
         for (let j = 0; j < tri.colorStops.length; j++) {
             let cs = tri.colorStops[j];
             grad.addColorStop(cs.stop, cs.color);
         }
         ctx.beginPath();
-        console.log(center.x, center.y, rad, tri.angleStart, tri.angleEnd);
+        // console.log(center.x, center.y, rad, tri.angleStart, tri.angleEnd);
         ctx.arc(center.x, center.y, rad, tri.angleStart, tri.angleEnd);
         ctx.strokeStyle = grad;
         ctx.lineWidth = size/15;
@@ -159,6 +171,8 @@ function drawOuterColorCircle(ctx,size) {
         // ctx.translate(-center.x,-center.y);
         ctx.stroke();
     }
+
+
 }
 
 function drawInnerColorCircleHSV(ctx,size,rgba) {
@@ -166,8 +180,9 @@ function drawInnerColorCircleHSV(ctx,size,rgba) {
     center.x = size / 2;
     center.y = size / 2;
 
-    let hue = 300;
-    let quant = size * 0.55; //量子化数
+    hsv = RGBtoHSVorHSL(rgba, 'HSV');
+    let hue = hsv[0];
+    let quant = Math.round(size * 0.55); //量子化数
     for (let i = 0; i < quant; i++) {
         for (let j = 0; j < quant; j++) {
             // hsv (h, i. quant-1-j)
@@ -179,20 +194,19 @@ function drawInnerColorCircleHSV(ctx,size,rgba) {
             if (i == 0) {
                 r = A; g = A; b = A;
             } else if (hue < 60) {
-                r = A, g = D, b = B;
+                r = A; g = D; b = B;
             } else if (hue < 120) {
-                r = C, g = A, b = B;
+                r = C; g = A; b = B;
             } else if (hue < 180) {
-                r = B, g = A. b = D;
+                r = B; g = A; b = D;
             } else if (hue < 240) {
-                r = B, g = C, g = A;
+                r = B; g = C; b = A;
             } else if (hue < 300) {
-                r = D, g = B, g = A;
+                r = D; g = B; b = A;
             } else {
-                r = A, g = B, b = C;
+                r = A; g = B; b = C;
             }
             ctx.fillStyle = 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')'; 
-            // console.log(ctx.fillStyle);
             ctx.fillRect(i + center.x - quant/2,j + center.y - quant/2, 1, 1);
         }
     }
@@ -203,7 +217,9 @@ function drawInnerColorCircleHSL(ctx,size,rgba) {
     center.x = size / 2;
     center.y = size / 2;
 
-    let hue = 200;
+    hsl = RGBtoHSVorHSL(rgba,'HSL');
+
+    hue = hsl[0];
     let quant = size * 0.65;
     for (let i = 0; i < quant; i++) {
         jRange = 2 * Math.sin(Math.PI * 1/3) * (- Math.abs(quant/2 - i) + quant/2);
@@ -215,25 +231,66 @@ function drawInnerColorCircleHSL(ctx,size,rgba) {
     }
 }
 
-function drawColorCircle(el, size, rgba) {
+function RGBtoHSVorHSL(rgba,colorSpace) {
+    r = rgba[0]; g = rgba[1]; b = rgba[2];
+    let rgb = [r,g,b];
+    max = Math.max.apply(null,rgb);
+    min = Math.min.apply(null,rgb);
+    maxi = maxIndex(rgb);
+    let h;
+    if (max - min == 0){
+        h = 0;
+    } else if (maxi == 0) {
+        h = (Math.round((g - b) / (max - min) * 60) + 360) % 360;
+    } else if (maxi == 1) { 
+        h = Math.round((b - r) / (max - min) * 60 + 120);
+    } else if (maxi == 2){
+        h = Math.round((r - g) / (max - min) * 60 + 240);
+    }
+    if (colorSpace == 'HSV'){
+        let s = Math.round((max - min) / max * 100);
+        let v = Math.round(max / 255 * 100);
+        let hsv = [h,s,v];
+        console.log(hsv);
+        return hsv;
+    } else {
+        let l = Math.round((max + min) / 2 * 100 / 255);
+        let s2;
+        if (l < 50) {
+            s2 = Math.round((max - min) / (max + min) * 100);
+        } else {
+            s2 = Math.round((max - min) / (510 - (max + min)) * 100);
+        }
+        let hsl = [h,s2,l];
+        return hsl;
+    }
+}
+
+function maxIndex(array){
+    let index = 0;
+    let value = -100;
+    for (let i = 0; i < array.length; i++) {
+        if (value < array[i]) {
+            value = array[i];
+            index = i;
+        }
+    }
+    return index;
+}
+
+function drawColorCircle(ctx, size, rgba) {
     // HSVカラーサークルの描画
-    let colorCircleHSV = document.createElement('canvas');
-    colorCircleHSV.className = 'color-circle';
-    colorCircleHSV.width = size;
-    colorCircleHSV.height = size;
-    let ctx = colorCircleHSV.getContext('2d');
+
+
     drawOuterColorCircle(ctx,size);
     drawInnerColorCircleHSV(ctx,size,rgba);
-    el.appendChild(colorCircleHSV);
+
 
     // HSLカラーサークルの描画
-    let colorCircleHSL = document.createElement('canvas');
-    colorCircleHSL.className = 'color-circle';
-    colorCircleHSL.width = size;
-    colorCircleHSL.height = size;
-    ctx = colorCircleHSL.getContext('2d');
-    drawOuterColorCircle(ctx,size);
-    drawInnerColorCircleHSL(ctx,size,rgba);
-    el.appendChild(colorCircleHSL);
+
+    // ctx = colorCircleHSL.getContext('2d');
+    // drawOuterColorCircle(ctx,size);
+    // drawInnerColorCircleHSL(ctx,size,rgba);
+
 
 }
