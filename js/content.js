@@ -19,13 +19,41 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     document.body.appendChild(colorCircles);
 
     
-    let colorCircleHSV = document.createElement('canvas');
-    colorCircleHSV.className = 'color-circle';
-    size = 100;
-    colorCircleHSV.width = size;
-    colorCircleHSV.height = size;
-    colorCircles.appendChild(colorCircleHSV);
+    let staticColorCircleHSV = document.createElement('canvas');
+    staticColorCircleHSV.className = 'color-circle';
+    size = 250;
+    staticColorCircleHSV.width = size;
+    staticColorCircleHSV.height = size;
+    colorCircles.appendChild(staticColorCircleHSV);
+    let ctxSHSV = staticColorCircleHSV.getContext('2d');
+    drawOuterColorCircle(ctxSHSV, size)
 
+    let dynamicColorCircleHSV = document.createElement('canvas');
+    dynamicColorCircleHSV.className = 'color-circle';
+    dynamicColorCircleHSV.style = 'position:absolute;top:0;left:0;';
+    dynamicColorCircleHSV.height = size;
+    dynamicColorCircleHSV.width = size;
+    colorCircles.appendChild(dynamicColorCircleHSV);
+    let ctxDHSV = dynamicColorCircleHSV.getContext('2d');
+    drawInnerColorCircleHSV(ctxDHSV, size, [255, 255, 255, 255]);
+
+    let staticColorCircleHSL = document.createElement('canvas');
+    staticColorCircleHSL.className = 'color-circle';
+    size = 250;
+    staticColorCircleHSL.width = size;
+    staticColorCircleHSL.height = size;
+    colorCircles.appendChild(staticColorCircleHSL);
+    let ctxSHSL = staticColorCircleHSL.getContext('2d');
+    drawOuterColorCircle(ctxSHSL, size)
+
+    let dynamicColorCircleHSL = document.createElement('canvas');
+    dynamicColorCircleHSL.className = 'color-circle';
+    dynamicColorCircleHSL.style = 'position:absolute;top:0;right:0;';
+    dynamicColorCircleHSL.height = size;
+    dynamicColorCircleHSL.width = size;
+    colorCircles.appendChild(dynamicColorCircleHSL);
+    let ctxDHSL = dynamicColorCircleHSL.getContext('2d');
+    drawInnerColorCircleHSL(ctxDHSL, size, [255, 255, 255, 255]);
 
     // let colorCircleHSL = document.createElement('canvas');
     // colorCircleHSL.className = 'color-circle';
@@ -40,12 +68,17 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
         // console.log("R:" + imageData.data[0] + " G:" + imageData.data[1] + " B:" + imageData.data[2] + " A:" + imageData.data[3]);
 
         colorInfo.style.backgroundColor = "rgba(" + imageData.data[0] + "," + imageData.data[1] + "," + imageData.data[2] + "," + imageData.data[3]/255 + ")";
-        colorInfo.style.top = mousePos.y+30 + "px";
-        colorInfo.style.left = mousePos.x+30 + "px";
+        colorInfo.style.top = mousePos.y+10 + "px";
+        colorInfo.style.left = mousePos.x+10 + "px";
 
-        let ctx2 = colorCircleHSV.getContext('2d');
-        drawColorCircle(ctx2,size,imageData.data);
-    },40));
+        drawOuterColorCirclePoint(ctxDHSV, size, imageData.data);
+        drawInnerColorCircleHSV(ctxDHSV, size, imageData.data);
+        drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
+
+        drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
+        drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
+        drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
+    },30));
 
     // el.appendChild(colorCircleHSL);
 }); 
@@ -171,8 +204,48 @@ function drawOuterColorCircle(ctx,size) {
         // ctx.translate(-center.x,-center.y);
         ctx.stroke();
     }
+}
 
+function drawOuterColorCirclePoint(ctx, size, rgba) {
+    let center = new Object();
+    center.x = size / 2;
+    center.y = size / 2;
+    ctx.clearRect(0,0,size,size);
+    rad = size/2*0.9;
+    hsv = RGBtoHSVorHSL(rgba, 'HSV');
+    ctx.beginPath();
+    ctx.arc(center.x + rad * Math.cos(((hsv[0] / 180 + 1) % 2) * Math.PI), center.y + rad * Math.sin(((hsv[0] / 180 + 1) % 2) * Math.PI), size/30, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgb(255,255,255)';
+    ctx.stroke();
+}
 
+function drawInnerColorCircleHSVPoint(ctx, size, rgba) {
+    let center = new Object();
+    center.x = size / 2;
+    center.y = size / 2;
+    let quant = Math.round(size * 0.55);
+
+    hsv = RGBtoHSVorHSL(rgba, 'HSV');
+    ctx.beginPath();
+    // ctx.arc(center.x - quant/2 + hsv[2]/100 * quant, center.y - quant/2 + hsv[1]/100 * quant, size/30, 0, 2 * Math.PI);
+    ctx.arc(center.x-quant/2 + hsv[1]/100 * quant ,center.y-quant/2 + (1 - hsv[2]/100) * quant ,size/30, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgb(255,255,255)';
+    ctx.stroke();
+}
+
+function drawInnerColorCircleHSLPoint(ctx, size, rgba) {
+    let center = new Object();
+    center.x = size / 2;
+    center.y = size / 2;
+
+    let quant = Math.round(size * 0.65);
+
+    hsl = RGBtoHSVorHSL(rgba, 'HSL');
+    ctx.beginPath();
+    ctx.arc(center.x - quant * Math.sin(Math.PI * 1/3) / 3 + hsl[1]/100 * (0.5 - Math.abs(0.5 - hsl[2] / 100)) * quant * Math.tan(Math.PI / 1/3),center.y - quant * Math.cos(Math.PI * 1/3) + (1 - hsl[2] / 100) * quant, size/30, 0, 2 * Math.PI);
+    // ctx.arc(center.x,center.y,size/30, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgb(255,255,255)';
+    ctx.stroke();
 }
 
 function drawInnerColorCircleHSV(ctx,size,rgba) {
@@ -220,7 +293,7 @@ function drawInnerColorCircleHSL(ctx,size,rgba) {
     hsl = RGBtoHSVorHSL(rgba,'HSL');
 
     hue = hsl[0];
-    let quant = size * 0.65;
+    let quant = Math.round(size * 0.65);
     for (let i = 0; i < quant; i++) {
         jRange = 2 * Math.sin(Math.PI * 1/3) * (- Math.abs(quant/2 - i) + quant/2);
         for (let j = 0; j < jRange; j++) {
@@ -282,7 +355,7 @@ function drawColorCircle(ctx, size, rgba) {
     // HSVカラーサークルの描画
 
 
-    drawOuterColorCircle(ctx,size);
+    drawOuterColorCircle(ctx,size,rgba);
     drawInnerColorCircleHSV(ctx,size,rgba);
 
 
