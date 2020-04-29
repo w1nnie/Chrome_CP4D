@@ -1,5 +1,9 @@
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
+    // 二度押しの禁止
+    chrome.runtime.sendMessage("activated");
+
+
     // canvasを作りbackground.jsから受け取ったimagePathを流し込み、domへ追加(全面にスクショ画像を表示)
     let canvas = document.createElement('canvas');
     canvas.className = 'screen-shot'
@@ -18,7 +22,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorCircles.className = 'color-circles';
     document.body.appendChild(colorCircles);
 
-    
+    // HSVの静的エレメント(外輪)
     let staticColorCircleHSV = document.createElement('canvas');
     staticColorCircleHSV.className = 'color-circle';
     size = 250;
@@ -28,6 +32,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     let ctxSHSV = staticColorCircleHSV.getContext('2d');
     drawOuterColorCircle(ctxSHSV, size)
 
+    // HSVの動的エレメント(内部, プロット)
     let dynamicColorCircleHSV = document.createElement('canvas');
     dynamicColorCircleHSV.className = 'color-circle';
     dynamicColorCircleHSV.style = 'position:absolute;top:0;left:0;';
@@ -37,6 +42,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     let ctxDHSV = dynamicColorCircleHSV.getContext('2d');
     drawInnerColorCircleHSV(ctxDHSV, size, [255, 255, 255, 255]);
 
+    // HSLの静的エレメント(外輪)
     let staticColorCircleHSL = document.createElement('canvas');
     staticColorCircleHSL.className = 'color-circle';
     size = 250;
@@ -46,6 +52,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     let ctxSHSL = staticColorCircleHSL.getContext('2d');
     drawOuterColorCircle(ctxSHSL, size)
 
+    // HSLの動的エレメント(内部, プロット)
     let dynamicColorCircleHSL = document.createElement('canvas');
     dynamicColorCircleHSL.className = 'color-circle';
     dynamicColorCircleHSL.style = 'position:absolute;top:0;right:0;';
@@ -55,12 +62,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     let ctxDHSL = dynamicColorCircleHSL.getContext('2d');
     drawInnerColorCircleHSL(ctxDHSL, size, [255, 255, 255, 255]);
 
-    // let colorCircleHSL = document.createElement('canvas');
-    // colorCircleHSL.className = 'color-circle';
-    // colorCircleHSL.width = size;
-    // colorCircleHSL.height = size;
-
-    // mousemoveを検知してimageDataを取得、処理
+    // mousemoveを検知してimageDataを取得、カラーサークルを更新
     canvas.addEventListener('mousemove',_.debounce(function(e) {
         let mousePos = getMousePosition(e);
         // console.log(mousePos);
@@ -80,8 +82,21 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
         drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
     },30));
 
-    // el.appendChild(colorCircleHSL);
+    document.addEventListener("keydown",quitFunc);
+
 }); 
+
+// 終了処理
+function quitFunc(e) {
+    // escapeのkeycodeは27
+    if (e.keyCode == 27) {
+        chrome.runtime.sendMessage("quit");
+        document.body.classList.remove('screen-shot');
+        document.body.classList.remove('mouse-tracker');
+        document.body.classList.remove('color-circles');
+        console.log(document.body.classList);
+    }
+}
 
 // canvasに画像を表示
 function draw(canvas,imagePath,ctx) {
