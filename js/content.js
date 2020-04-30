@@ -64,37 +64,53 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
     // mousemoveを検知してimageDataを取得、カラーサークルを更新
     canvas.addEventListener('mousemove',_.debounce(function(e) {
-        let mousePos = getMousePosition(e);
-        // console.log(mousePos);
-        imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
-        // console.log("R:" + imageData.data[0] + " G:" + imageData.data[1] + " B:" + imageData.data[2] + " A:" + imageData.data[3]);
-
-        colorInfo.style.backgroundColor = "rgba(" + imageData.data[0] + "," + imageData.data[1] + "," + imageData.data[2] + "," + imageData.data[3]/255 + ")";
-        colorInfo.style.top = mousePos.y+10 + "px";
-        colorInfo.style.left = mousePos.x+10 + "px";
-
-        drawOuterColorCirclePoint(ctxDHSV, size, imageData.data);
-        drawInnerColorCircleHSV(ctxDHSV, size, imageData.data);
-        drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
-
-        drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
-        drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
-        drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
+        updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size);
     },30));
 
-    document.addEventListener("keydown",quitFunc);
+    document.addEventListener("keydown",function(e){
+        chrome.runtime.sendMessage("quit");
+        a = document.body.getElementsByClassName("color-circles");
+        b = document.body.getElementsByClassName("mouse-tracker");
+        c = document.body.getElementsByClassName("screen-shot");
+        document.body.removeChild(a[0]);
+        document.body.removeChild(b[0]);
+        document.body.removeChild(c[0]);
+        document.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxSHSL, size));
+    });
 
 }); 
 
+function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size) {
+    let mousePos = getMousePosition(e);
+    // console.log(mousePos);
+    imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
+    // console.log("R:" + imageData.data[0] + " G:" + imageData.data[1] + " B:" + imageData.data[2] + " A:" + imageData.data[3]);
+
+    colorInfo.style.backgroundColor = "rgba(" + imageData.data[0] + "," + imageData.data[1] + "," + imageData.data[2] + "," + imageData.data[3]/255 + ")";
+    colorInfo.style.top = mousePos.y+10 + "px";
+    colorInfo.style.left = mousePos.x+10 + "px";
+
+    drawOuterColorCirclePoint(ctxDHSV, size, imageData.data);
+    drawInnerColorCircleHSV(ctxDHSV, size, imageData.data);
+    drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
+
+    drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
+    drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
+    drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
+};
+
 // 終了処理
-function quitFunc(e) {
+function quitFunc(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size) {
     // escapeのkeycodeは27
+    a = document.body.getElementsByClassName("color-circles");
+    b = document.body.getElementsByClassName("mouse-tracker");
+    c = document.body.getElementsByClassName("screen-shot");
     if (e.keyCode == 27) {
+        document.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size));
         chrome.runtime.sendMessage("quit");
-        document.body.classList.remove('screen-shot');
-        document.body.classList.remove('mouse-tracker');
-        document.body.classList.remove('color-circles');
-        console.log(document.body.classList);
+        document.body.removeChild(a[0]);
+        document.body.removeChild(b[0]);
+        document.body.removeChild(c[0]);
     }
 }
 
@@ -258,7 +274,8 @@ function drawInnerColorCircleHSLPoint(ctx, size, rgba) {
     hsl = RGBtoHSVorHSL(rgba, 'HSL');
     ctx.beginPath();
     ctx.arc(center.x - quant * Math.sin(Math.PI * 1/3) / 3 + hsl[1]/100 * (0.5 - Math.abs(0.5 - hsl[2] / 100)) * quant * Math.tan(Math.PI / 1/3),center.y - quant * Math.cos(Math.PI * 1/3) + (1 - hsl[2] / 100) * quant, size/30, 0, 2 * Math.PI);
-    // ctx.arc(center.x,center.y,size/30, 0, 2 * Math.PI);
+    console.log(hsl[1]/100 * (0.5 - Math.abs(0.5 - hsl[2] / 100)) * quant * Math.tan(Math.PI / 1/3));
+
     ctx.strokeStyle = 'rgb(255,255,255)';
     ctx.stroke();
 }
@@ -339,18 +356,21 @@ function RGBtoHSVorHSL(rgba,colorSpace) {
         let s = Math.round((max - min) / max * 100);
         let v = Math.round(max / 255 * 100);
         let hsv = [h,s,v];
-        console.log(hsv);
+        console.log("hsv = " + hsv);
         return hsv;
     } else {
         let l = Math.round((max + min) / 2 * 100 / 255);
         let s2;
         if (l < 50) {
             s2 = Math.round((max - min) / (max + min) * 100);
-        } else {
+        } else if (l < 99) {
             s2 = Math.round((max - min) / (510 - (max + min)) * 100);
+        } else {
+            s2 = 100;
         }
         let hsl = [h,s2,l];
-        return hsl;
+        console.log("hsl = " + hsl);
+        return hsl; 
     }
 }
 
