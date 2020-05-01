@@ -19,3 +19,7 @@ chrome.tabs.onUpdated.addListener(function(){
         chrome.browserAction.enable();
     }
 );
+chrome.tabs.onRemoved.addListener(function(){
+    chrome.browserAction.enable();
+}
+);
