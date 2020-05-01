@@ -14,3 +14,8 @@ chrome.runtime.onMessage.addListener(
         }
 	}
 );
+
+chrome.tabs.onUpdated.addListener(function(){
+        chrome.browserAction.enable();
+    }
+);
