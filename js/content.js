@@ -65,17 +65,19 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     // mousemoveを検知してimageDataを取得、カラーサークルを更新
     canvas.addEventListener('mousemove',_.debounce(function(e) {
         updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size);
-    },30));
+    },1));
 
     document.addEventListener("keydown",function(e){
-        chrome.runtime.sendMessage("quit");
-        a = document.body.getElementsByClassName("color-circles");
-        b = document.body.getElementsByClassName("mouse-tracker");
-        c = document.body.getElementsByClassName("screen-shot");
-        document.body.removeChild(a[0]);
-        document.body.removeChild(b[0]);
-        document.body.removeChild(c[0]);
-        document.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxSHSL, size));
+        if (e.keyCode == 27) {
+            chrome.runtime.sendMessage("quit");
+            a = document.body.getElementsByClassName("color-circles");
+            b = document.body.getElementsByClassName("mouse-tracker");
+            c = document.body.getElementsByClassName("screen-shot");
+            document.body.removeChild(a[0]);
+            document.body.removeChild(b[0]);
+            document.body.removeChild(c[0]);
+            document.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxSHSL, size));
+        }
     });
 
 }); 
@@ -273,8 +275,8 @@ function drawInnerColorCircleHSLPoint(ctx, size, rgba) {
 
     hsl = RGBtoHSVorHSL(rgba, 'HSL');
     ctx.beginPath();
+    x1 = 
     ctx.arc(center.x - quant * Math.sin(Math.PI * 1/3) / 3 + hsl[1]/100 * (0.5 - Math.abs(0.5 - hsl[2] / 100)) * quant * Math.tan(Math.PI / 1/3),center.y - quant * Math.cos(Math.PI * 1/3) + (1 - hsl[2] / 100) * quant, size/30, 0, 2 * Math.PI);
-    console.log(hsl[1]/100 * (0.5 - Math.abs(0.5 - hsl[2] / 100)) * quant * Math.tan(Math.PI / 1/3));
 
     ctx.strokeStyle = 'rgb(255,255,255)';
     ctx.stroke();
@@ -289,31 +291,33 @@ function drawInnerColorCircleHSV(ctx,size,rgba) {
     let hue = hsv[0];
     let quant = Math.round(size * 0.55); //量子化数
     for (let i = 0; i < quant; i++) {
-        for (let j = 0; j < quant; j++) {
-            // hsv (h, i. quant-1-j)
-            h = (hue / 60) % 1
-            A = (quant - 1 - j)/quant * 255;
-            B = (quant - 1 - j)/quant * (1 - i/quant) * 255;
-            C = (quant - 1 - j)/quant * (1 - i/quant * h) * 255;
-            D = (quant - 1 - j)/quant * (1 - i/quant * (1 - h)) * 255;
-            if (i == 0) {
-                r = A; g = A; b = A;
-            } else if (hue < 60) {
-                r = A; g = D; b = B;
-            } else if (hue < 120) {
-                r = C; g = A; b = B;
-            } else if (hue < 180) {
-                r = B; g = A; b = D;
-            } else if (hue < 240) {
-                r = B; g = C; b = A;
-            } else if (hue < 300) {
-                r = D; g = B; b = A;
-            } else {
-                r = A; g = B; b = C;
-            }
-            ctx.fillStyle = 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')'; 
-            ctx.fillRect(i + center.x - quant/2,j + center.y - quant/2, 1, 1);
+        // hsv (h, i. quant-1-j)
+        h = (hue / 60) % 1;
+        A = Math.round((quant - i) / quant * 255);
+        B = 0;
+        C = Math.round((quant - i) / quant * (1 - h) * 255);
+        D = Math.round((quant - i) / quant * (1 - (1 - h)) * 255);
+        if (hue < 60) {
+            r = A; g = D; b = B;
+        } else if (hue < 120) {
+            r = C; g = A; b = B;
+        } else if (hue < 180) {
+            r = B; g = A; b = D;
+        } else if (hue < 240) {
+            r = B; g = C; b = A;
+        } else if (hue < 300) {
+            r = D; g = B; b = A;
+        } else {
+            r = A; g = B; b = C;
         }
+        r2 = Math.round((quant - i) / quant * 255);
+        g2 = Math.round((quant - i) / quant * 255);
+        b2 = Math.round((quant - i) / quant * 255);
+        grad = ctx.createLinearGradient(center.x - quant/2, center.y - quant/2 + i, center.x + quant/2, center.y - quant/2 + i);
+        grad.addColorStop(0, 'rgb(' + r2 + ',' + g2 + ',' + b2 + ')');
+        grad.addColorStop(1, 'rgb(' + r + ',' + g + ',' + b + ')');
+        ctx.fillStyle = grad;
+        ctx.fillRect(center.x - quant/2, center.y - quant/2 + i, quant, 1);
     }
 }
 
@@ -326,13 +330,14 @@ function drawInnerColorCircleHSL(ctx,size,rgba) {
 
     hue = hsl[0];
     let quant = Math.round(size * 0.65);
+    centroidX = quant * Math.sin(Math.PI * 1/3) / 3;
     for (let i = 0; i < quant; i++) {
-        jRange = 2 * Math.sin(Math.PI * 1/3) * (- Math.abs(quant/2 - i) + quant/2);
-        for (let j = 0; j < jRange; j++) {
-            // hsl (h, i, )
-            ctx.fillStyle = 'hsl(' + hue + ',' + Math.round(j / jRange * 100) + '%,' + Math.round((quant - i) / quant * 100) + '%)';
-            ctx.fillRect(j + center.x - Math.round(quant * Math.sin(Math.PI * 1/3) / 3), Math.round(i + center.y - quant / 2), 1, 1);
-        }
+        width = 2 * Math.sin(Math.PI * 1/3) * (- Math.abs(quant/2 - i) + quant/2);
+        grad = ctx.createLinearGradient(center.x - centroidX, center.y - quant/2, center.x - centroidX + width, center.y - quant/2);
+        grad.addColorStop(0, 'hsl(' + hue + ',0%,' + Math.round((quant - i) / quant * 100) + '%)');
+        grad.addColorStop(1, 'hsl(' + hue + ',100%,' + Math.round((quant - i) / quant * 100) + '%)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(center.x - centroidX, Math.round(i + center.y - quant / 2), width, 1);
     }
 }
 
@@ -356,7 +361,7 @@ function RGBtoHSVorHSL(rgba,colorSpace) {
         let s = Math.round((max - min) / max * 100);
         let v = Math.round(max / 255 * 100);
         let hsv = [h,s,v];
-        console.log("hsv = " + hsv);
+        // console.log("hsv = " + hsv);
         return hsv;
     } else {
         let l = Math.round((max + min) / 2 * 100 / 255);
@@ -369,7 +374,7 @@ function RGBtoHSVorHSL(rgba,colorSpace) {
             s2 = 100;
         }
         let hsl = [h,s2,l];
-        console.log("hsl = " + hsl);
+        // console.log("hsl = " + hsl);
         return hsl; 
     }
 }
