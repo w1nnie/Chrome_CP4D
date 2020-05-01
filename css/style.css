@@ -1,6 +1,6 @@
 .screen-shot{
     overflow: hidden;
-    z-index: 10000;
+    z-index: 2147483645;
     position: fixed;
     width: 100vw;
     height: 100vh;
@@ -13,7 +13,7 @@
 .mouse-tracker {
     width: 40px;
     height: 40px;
-    z-index: 10001;
+    z-index: 2147483646;
     position: fixed;
     pointer-events: none;
 }
@@ -25,12 +25,11 @@
     top: 0px;
     left: 0px;
     background-color: #555;
-    z-index: 10001;
+    z-index: 2147483646;
     display: flex;
 }
 
-/* .color-circle {
-    width: 80%;
-    height: 80%;
-    background-color: #eee;
-} */
+.color-circle {
+    margin: 0;
+    background: rgba(0,0,0,0);
+}
