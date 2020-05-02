@@ -67,6 +67,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
         updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size);
     },1));
 
+    // escキーでdomを削除
     document.addEventListener("keydown",function(e){
         if (e.keyCode == 27) {
             chrome.runtime.sendMessage("quit");
