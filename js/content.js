@@ -13,7 +13,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     document.body.appendChild(canvas);
 
     // マウスに追従するポップアップ
-    let colorInfo = document.createElement('div');
+    let colorInfo = document.createElement('canvas');
     colorInfo.className = 'mouse-tracker';
     document.body.appendChild(colorInfo);
 
@@ -89,18 +89,43 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size) {
     imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
     // console.log("R:" + imageData.data[0] + " G:" + imageData.data[1] + " B:" + imageData.data[2] + " A:" + imageData.data[3]);
 
-    colorInfo.style.backgroundColor = "rgba(" + imageData.data[0] + "," + imageData.data[1] + "," + imageData.data[2] + "," + imageData.data[3]/255 + ")";
+    magnifier(mousePos, ctx);
     colorInfo.style.top = mousePos.y+10 + "px";
     colorInfo.style.left = mousePos.x+10 + "px";
 
+    // HSVのプロットと四角の描画を更新
     drawOuterColorCirclePoint(ctxDHSV, size, imageData.data);
     drawInnerColorCircleHSV(ctxDHSV, size, imageData.data);
     drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
 
+    // HSLのプロットと三角の描画を更新
     drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
     drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
     drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
 };
+
+// 拡大鏡
+function magnifier(mousePos, ctx) {
+    let mt = document.getElementsByClassName("mouse-tracker")[0];
+    magnifierGridSize = 25; // 奇数
+    magnifierPopupSize = 200;
+    mt.width = magnifierPopupSize; mt.height = magnifierPopupSize;
+
+    unitSquareSize = magnifierPopupSize / magnifierGridSize;
+    ctxMT = mt.getContext('2d');
+    imageDataForMagnifier = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,magnifierGridSize,magnifierGridSize);
+    for (let i = 0; i < magnifierGridSize; i++) {
+        for (let j = 0; j < magnifierGridSize; j++) {
+            r = imageDataForMagnifier.data[(i * magnifierGridSize + j) * 4];
+            g = imageDataForMagnifier.data[(i * magnifierGridSize + j) * 4 + 1];
+            b = imageDataForMagnifier.data[(i * magnifierGridSize + j) * 4 + 2];
+            ctxMT.fillStyle = "rgb(" + r + "," + g + "," + b  + ")";
+            ctxMT.fillRect(j * unitSquareSize, i * unitSquareSize, unitSquareSize, unitSquareSize);
+        }
+    }
+    ctxMT.strokeStyle = 'black';
+    ctxMT.strokeRect(Math.floor(magnifierGridSize/2) * unitSquareSize, Math.floor(magnifierGridSize/2) * unitSquareSize, unitSquareSize, unitSquareSize);
+}
 
 // 終了処理
 function quitFunc(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size) {
