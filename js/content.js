@@ -107,13 +107,13 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size) {
 // 拡大鏡
 function magnifier(mousePos, ctx) {
     let mt = document.getElementsByClassName("mouse-tracker")[0];
-    magnifierGridSize = 65; // 奇数
-    magnifierPopupSize = 200;
+    magnifierGridSize = 70; // 奇数
+    magnifierPopupSize = 210;
     mt.width = magnifierPopupSize; mt.height = magnifierPopupSize;
 
-    unitSquareSize = Math.ceil(magnifierPopupSize / magnifierGridSize);
+    unitSquareSize = magnifierPopupSize / magnifierGridSize; // 整数である必要がある
     ctxMT = mt.getContext('2d');
-    imageDataForMagnifier = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,magnifierGridSize,magnifierGridSize);
+    imageDataForMagnifier = ctx.getImageData(mousePos.x*window.devicePixelRatio　- Math.floor(magnifierGridSize/2),mousePos.y*window.devicePixelRatio - Math.floor(magnifierGridSize/2),magnifierGridSize,magnifierGridSize);
     for (let i = 0; i < magnifierGridSize; i++) {
         for (let j = 0; j < magnifierGridSize; j++) {
             r = imageDataForMagnifier.data[(i * magnifierGridSize + j) * 4];
