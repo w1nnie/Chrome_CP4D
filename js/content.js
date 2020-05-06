@@ -108,23 +108,59 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size) {
 function magnifier(mousePos, ctx) {
     let mt = document.getElementsByClassName("mouse-tracker")[0];
     magnifierGridSize = 70; // 奇数
-    magnifierPopupSize = 210;
-    mt.width = magnifierPopupSize; mt.height = magnifierPopupSize;
+    magnifierPopupSize = 240;
+    mt.width = magnifierPopupSize;
+    mt.height = magnifierPopupSize;
 
-    unitSquareSize = magnifierPopupSize / magnifierGridSize; // 整数である必要がある
+    unitSquareSize = Math.floor(magnifierPopupSize / magnifierGridSize); // 整数である必要がある
     ctxMT = mt.getContext('2d');
     imageDataForMagnifier = ctx.getImageData(mousePos.x*window.devicePixelRatio　- Math.floor(magnifierGridSize/2),mousePos.y*window.devicePixelRatio - Math.floor(magnifierGridSize/2),magnifierGridSize,magnifierGridSize);
+    let w = unitSquareSize;
+    let h = unitSquareSize;
+    let x = 0;
+    let y = 0;
+    let cx,cy;
+    let ex,ey;
     for (let i = 0; i < magnifierGridSize; i++) {
+        x = 0;
         for (let j = 0; j < magnifierGridSize; j++) {
             r = imageDataForMagnifier.data[(i * magnifierGridSize + j) * 4];
             g = imageDataForMagnifier.data[(i * magnifierGridSize + j) * 4 + 1];
             b = imageDataForMagnifier.data[(i * magnifierGridSize + j) * 4 + 2];
             ctxMT.fillStyle = "rgb(" + r + "," + g + "," + b  + ")";
-            ctxMT.fillRect(j * unitSquareSize, i * unitSquareSize, unitSquareSize, unitSquareSize);
+            if (i == Math.floor(magnifierGridSize/2) && j == Math.floor(magnifierGridSize/2)) {
+                w = unitSquareSize * 4;
+                h = unitSquareSize * 4;
+                ctxMT.fillRect(x, y, w, h);
+                cx = x;
+                cy = y;
+            } else if (i == Math.floor(magnifierGridSize/2)) {
+                w = unitSquareSize;
+                h = unitSquareSize * 4;
+                ctxMT.fillRect(x, y, w, h);
+            } else if (j == Math.floor(magnifierGridSize/2)) {
+                w = unitSquareSize * 4;
+                h = unitSquareSize;
+                ctxMT.fillRect(x, y, w, h);
+            } else {
+                w = unitSquareSize;
+                h = unitSquareSize;
+                ctxMT.fillRect(x, y, w, h);
+            }
+            x += w;
+            if (j == magnifierGridSize - 1) {
+                ex = x + unitSquareSize;
+            }
+        }
+        y += h;
+        if (i == magnifierGridSize - 1) {
+            ey = y + unitSquareSize;
         }
     }
     ctxMT.strokeStyle = 'black';
-    ctxMT.strokeRect(Math.floor(magnifierGridSize/2) * unitSquareSize, Math.floor(magnifierGridSize/2) * unitSquareSize, unitSquareSize, unitSquareSize);
+    ctxMT.strokeRect(0, 0, ex, ey);
+    ctxMT.strokeRect(cx, 0, unitSquareSize * 4, ey);
+    ctxMT.strokeRect(0, cy, ex, unitSquareSize * 4);
 }
 
 // 終了処理
