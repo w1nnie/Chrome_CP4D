@@ -64,27 +64,33 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
 
     debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles),1);
-    document.body.addEventListener('mousemove', debounce);
+    window.addEventListener('mousemove', debounce);
 
     document.body.addEventListener('click',function(){
-        document.body.removeEventListener('mousemove', debounce);
+        window.removeEventListener('mousemove', debounce);
     });
 
     // escキーでdomを削除
-    document.body.addEventListener("keydown",function(e){
-        if (e.keyCode == 27) {
-            chrome.runtime.sendMessage("quit");
-            a = document.body.getElementsByClassName("color-circles");
-            b = document.body.getElementsByClassName("mouse-tracker");
-            c = document.body.getElementsByClassName("screen-shot");
-            document.body.removeChild(a[0]);
-            document.body.removeChild(b[0]);
-            document.body.removeChild(c[0]);
-            document.body.removeEventListener('mousemove',debounce);
-        }
-    });
+    quitEvent = e => quit(e,isQuit);
+    window.addEventListener("keyup",quitEvent);
+
 
 });
+
+function quit(e,isQuit){
+    if (e.keyCode == 27) {
+        chrome.runtime.sendMessage("quit");
+        isQuit = true;
+        window.removeEventListener('mousemove',debounce);
+        a = document.body.getElementsByClassName("color-circles");
+        b = document.body.getElementsByClassName("mouse-tracker");
+        c = document.body.getElementsByClassName("screen-shot");
+        document.body.removeChild(a[0]);
+        document.body.removeChild(b[0]);
+        document.body.removeChild(c[0]);
+        window.removeEventListener("keyup",quitEvent);
+    }
+}
 
 // マウスの移動によって描画を更新
 function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles) {
@@ -113,7 +119,7 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
     // drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
     // drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
     // drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
-};
+}
 
 // 拡大鏡
 function magnifier(mousePos, ctx) {
