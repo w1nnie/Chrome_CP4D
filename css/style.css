@@ -17,11 +17,10 @@
 }
 
 .color-circles {
-    width: 500px;
+    width: 250px;
     height: 250px;
-    position: fixed;
     top: 0px;
-    left: 0px;
+    position: fixed;
     background-color: #555;
     z-index: 2147483646;
     display: flex;

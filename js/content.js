@@ -22,10 +22,11 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorCircles.className = 'color-circles';
     document.body.appendChild(colorCircles);
 
+    let size = 250;
+
     // HSVの静的エレメント(外輪)
     let staticColorCircleHSV = document.createElement('canvas');
     staticColorCircleHSV.className = 'color-circle';
-    size = 250;
     staticColorCircleHSV.width = size;
     staticColorCircleHSV.height = size;
     colorCircles.appendChild(staticColorCircleHSV);
@@ -43,29 +44,32 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     drawInnerColorCircleHSV(ctxDHSV, size, [255, 255, 255, 255]);
 
     // HSLの静的エレメント(外輪)
-    let staticColorCircleHSL = document.createElement('canvas');
-    staticColorCircleHSL.className = 'color-circle';
-    size = 250;
-    staticColorCircleHSL.width = size;
-    staticColorCircleHSL.height = size;
-    colorCircles.appendChild(staticColorCircleHSL);
-    let ctxSHSL = staticColorCircleHSL.getContext('2d');
-    drawOuterColorCircle(ctxSHSL, size)
+    // let staticColorCircleHSL = document.createElement('canvas');
+    // staticColorCircleHSL.className = 'color-circle';
+    // staticColorCircleHSL.width = size;
+    // staticColorCircleHSL.height = size;
+    // colorCircles.appendChild(staticColorCircleHSL);
+    // let ctxSHSL = staticColorCircleHSL.getContext('2d');
+    // drawOuterColorCircle(ctxSHSL, size)
 
     // HSLの動的エレメント(内部, プロット)
-    let dynamicColorCircleHSL = document.createElement('canvas');
-    dynamicColorCircleHSL.className = 'color-circle';
-    dynamicColorCircleHSL.style = 'position:absolute;top:0;right:0;';
-    dynamicColorCircleHSL.height = size;
-    dynamicColorCircleHSL.width = size;
-    colorCircles.appendChild(dynamicColorCircleHSL);
-    let ctxDHSL = dynamicColorCircleHSL.getContext('2d');
-    drawInnerColorCircleHSL(ctxDHSL, size, [255, 255, 255, 255]);
+    // let dynamicColorCircleHSL = document.createElement('canvas');
+    // dynamicColorCircleHSL.className = 'color-circle';
+    // dynamicColorCircleHSL.style = 'position:absolute;top:0;right:0;';
+    // dynamicColorCircleHSL.height = size;
+    // dynamicColorCircleHSL.width = size;
+    // colorCircles.appendChild(dynamicColorCircleHSL);
+    // let ctxDHSL = dynamicColorCircleHSL.getContext('2d');
+    // drawInnerColorCircleHSL(ctxDHSL, size, [255, 255, 255, 255]);
 
     // mousemoveを検知してimageDataを取得、カラーサークルを更新
     canvas.addEventListener('mousemove',_.debounce(function(e) {
-        updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size);
+        updateColorCircle(e, ctx, colorInfo, ctxDHSV, null, size, colorCircles);
     },1));
+
+    canvas.addEventListener('click',function(e){
+        canvas.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, null, size, colorCircles));
+    });
 
     // escキーでdomを削除
     document.addEventListener("keydown",function(e){
@@ -77,17 +81,24 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
             document.body.removeChild(a[0]);
             document.body.removeChild(b[0]);
             document.body.removeChild(c[0]);
-            document.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxSHSL, size));
+            document.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, null, size));
         }
     });
 
 }); 
 
-function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size) {
+function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles) {
     let mousePos = getMousePosition(e);
-    // console.log(mousePos);
+    console.log(mousePos);
     imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
-    // console.log("R:" + imageData.data[0] + " G:" + imageData.data[1] + " B:" + imageData.data[2] + " A:" + imageData.data[3]);
+
+    if (mousePos.x < size + 30 && mousePos.y < size + 30) {
+        colorCircles.style.right = "0";
+        colorCircles.style.left = "auto";
+    } else {
+        colorCircles.style.right = "auto";
+        colorCircles.style.left = "0";
+    }
 
     magnifier(mousePos, ctx);
     colorInfo.style.top = mousePos.y+10 + "px";
@@ -99,16 +110,16 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size) {
     drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
 
     // HSLのプロットと三角の描画を更新
-    drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
-    drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
-    drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
+    // drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
+    // drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
+    // drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
 };
 
 // 拡大鏡
 function magnifier(mousePos, ctx) {
     let mt = document.getElementsByClassName("mouse-tracker")[0];
     magnifierGridSize = 70; // 奇数
-    magnifierPopupSize = 240;
+    magnifierPopupSize = 225;
     mt.width = magnifierPopupSize;
     mt.height = magnifierPopupSize;
 
