@@ -15,6 +15,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     // マウスに追従するポップアップ
     let colorInfo = document.createElement('canvas');
     colorInfo.className = 'mouse-tracker';
+    colorInfo.style.backgroundColor = 'rgba(0,0,0,1)';
     document.body.appendChild(colorInfo);
 
     // カラーサークルを表示するポップアップ
@@ -70,7 +71,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
         clickCount ++;
         if (clickCount % 2 == 1){
             window.removeEventListener('mousemove', debounce);
-            colorInfo.style.opacity = 0.5;
+            colorInfo.style.opacity = 0.65;
             // colorInfo.style.display = 'none';
         } else {
             window.addEventListener('mousemove', debounce);
@@ -133,8 +134,8 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
 // 拡大鏡
 function magnifier(mousePos, ctx) {
     let mt = document.getElementsByClassName("mouse-tracker")[0];
-    magnifierGridSize = 70; // 奇数
-    magnifierPopupSize = 225;
+    magnifierGridSize = 75; // 奇数
+    magnifierPopupSize = 236;
     mt.width = magnifierPopupSize;
     mt.height = magnifierPopupSize;
 
@@ -143,12 +144,14 @@ function magnifier(mousePos, ctx) {
     imageDataForMagnifier = ctx.getImageData(mousePos.x*window.devicePixelRatio　- Math.floor(magnifierGridSize/2),mousePos.y*window.devicePixelRatio - Math.floor(magnifierGridSize/2),magnifierGridSize,magnifierGridSize);
     let w = unitSquareSize;
     let h = unitSquareSize;
-    let x = 0;
-    let y = 0;
+    let offsetX = Math.floor((magnifierPopupSize - (magnifierGridSize + 3) * unitSquareSize) / 2);
+    let offsetY = Math.floor((magnifierPopupSize - (magnifierGridSize + 3) * unitSquareSize) / 2);
+    let x = offsetX;
+    let y = offsetY;
     let cx,cy;
     let ex,ey;
     for (let i = 0; i < magnifierGridSize; i++) {
-        x = 0;
+        x = offsetX;
         for (let j = 0; j < magnifierGridSize; j++) {
             r = imageDataForMagnifier.data[(i * magnifierGridSize + j) * 4];
             g = imageDataForMagnifier.data[(i * magnifierGridSize + j) * 4 + 1];
@@ -175,19 +178,19 @@ function magnifier(mousePos, ctx) {
             }
             x += w;
             if (j == magnifierGridSize - 1) {
-                ex = x + unitSquareSize;
+                ex = x + unitSquareSize - offsetX - w;
             }
         }
         y += h;
         if (i == magnifierGridSize - 1) {
-            ey = y + unitSquareSize;
+            ey = y + unitSquareSize - offsetY - h;
         }
     }
     ctxMT.strokeStyle = 'black';
-    ctxMT.strokeRect(0, 0, ex, ey);
-    ctxMT.strokeRect(cx, 0, unitSquareSize * 4, ey);
-    ctxMT.strokeRect(0, cy, ex, unitSquareSize * 4);
-    ctxMT.strokeRect(cx-1, cy-1, unitSquareSize * 4 + 2, unitSquareSize * 4 + 2)
+    ctxMT.strokeRect(offsetX, offsetY, ex, ey);
+    ctxMT.strokeRect(cx, offsetY, unitSquareSize * 4, ey);
+    ctxMT.strokeRect(offsetX, cy, ex, unitSquareSize * 4);
+    ctxMT.strokeRect(cx - 1, cy - 1, unitSquareSize * 4 + 2, unitSquareSize * 4 + 2)
 }
 
 // canvasに画像を表示
