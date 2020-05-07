@@ -62,25 +62,34 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     let ctxDHSL = dynamicColorCircleHSL.getContext('2d');
     // drawInnerColorCircleHSL(ctxDHSL, size, [255, 255, 255, 255]);
 
-
+    let clickCount = 0;
     debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles),1);
     window.addEventListener('mousemove', debounce);
 
-    document.body.addEventListener('click',function(){
-        window.removeEventListener('mousemove', debounce);
+    canvas.addEventListener('click',function(){
+        clickCount ++;
+        if (clickCount % 2 == 1){
+            window.removeEventListener('mousemove', debounce);
+            colorInfo.style.opacity = 0.5;
+            // colorInfo.style.display = 'none';
+        } else {
+            window.addEventListener('mousemove', debounce);
+            colorInfo.style.opacity = 1;
+            // colorInfo.style.display = 'inline';
+        }
     });
 
     // escキーでdomを削除
-    quitEvent = e => quit(e,isQuit);
+    quitEvent = e => quit(e);
     window.addEventListener("keyup",quitEvent);
 
 
 });
 
+// 終了処理
 function quit(e,isQuit){
     if (e.keyCode == 27) {
         chrome.runtime.sendMessage("quit");
-        isQuit = true;
         window.removeEventListener('mousemove',debounce);
         a = document.body.getElementsByClassName("color-circles");
         b = document.body.getElementsByClassName("mouse-tracker");
@@ -95,7 +104,7 @@ function quit(e,isQuit){
 // マウスの移動によって描画を更新
 function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles) {
     let mousePos = getMousePosition(e);
-    console.log(mousePos);
+    // console.log(mousePos);
     imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
 
     if (mousePos.x < size + 30 && mousePos.y < size + 30) {
@@ -178,21 +187,7 @@ function magnifier(mousePos, ctx) {
     ctxMT.strokeRect(0, 0, ex, ey);
     ctxMT.strokeRect(cx, 0, unitSquareSize * 4, ey);
     ctxMT.strokeRect(0, cy, ex, unitSquareSize * 4);
-}
-
-// 終了処理
-function quitFunc(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size) {
-    // escapeのkeycodeは27
-    a = document.body.getElementsByClassName("color-circles");
-    b = document.body.getElementsByClassName("mouse-tracker");
-    c = document.body.getElementsByClassName("screen-shot");
-    if (e.keyCode == 27) {
-        document.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size));
-        chrome.runtime.sendMessage("quit");
-        document.body.removeChild(a[0]);
-        document.body.removeChild(b[0]);
-        document.body.removeChild(c[0]);
-    }
+    ctxMT.strokeRect(cx-1, cy-1, unitSquareSize * 4 + 2, unitSquareSize * 4 + 2)
 }
 
 // canvasに画像を表示
@@ -215,6 +210,7 @@ function getMousePosition(e) {
     };
 }
 
+// 外輪の描画
 function drawOuterColorCircle(ctx,size) {
     let center = new Object();
     center.x = size / 2;
@@ -318,6 +314,7 @@ function drawOuterColorCircle(ctx,size) {
     }
 }
 
+// 外輪のプロットの描画
 function drawOuterColorCirclePoint(ctx, size, rgba) {
     let center = new Object();
     center.x = size / 2;
@@ -331,6 +328,7 @@ function drawOuterColorCirclePoint(ctx, size, rgba) {
     ctx.stroke();
 }
 
+// 内四角のプロットの描画
 function drawInnerColorCircleHSVPoint(ctx, size, rgba) {
     let center = new Object();
     center.x = size / 2;
@@ -345,6 +343,7 @@ function drawInnerColorCircleHSVPoint(ctx, size, rgba) {
     ctx.stroke();
 }
 
+// 内三角のプロットの描画
 function drawInnerColorCircleHSLPoint(ctx, size, rgba) {
     let center = new Object();
     center.x = size / 2;
@@ -361,6 +360,7 @@ function drawInnerColorCircleHSLPoint(ctx, size, rgba) {
     ctx.stroke();
 }
 
+// 内四角の描画
 function drawInnerColorCircleHSV(ctx,size,rgba) {
     let center = new Object();
     center.x = size / 2;
@@ -400,6 +400,7 @@ function drawInnerColorCircleHSV(ctx,size,rgba) {
     }
 }
 
+// 内三角の描画
 function drawInnerColorCircleHSL(ctx,size,rgba) {
     let center = new Object();
     center.x = size / 2;
@@ -420,6 +421,7 @@ function drawInnerColorCircleHSL(ctx,size,rgba) {
     }
 }
 
+// RGBをHSVまたはHSLに変換
 function RGBtoHSVorHSL(rgba,colorSpace) {
     r = rgba[0]; g = rgba[1]; b = rgba[2];
     let rgb = [r,g,b];
@@ -468,21 +470,4 @@ function maxIndex(array){
         }
     }
     return index;
-}
-
-function drawColorCircle(ctx, size, rgba) {
-    // HSVカラーサークルの描画
-
-
-    drawOuterColorCircle(ctx,size,rgba);
-    drawInnerColorCircleHSV(ctx,size,rgba);
-
-
-    // HSLカラーサークルの描画
-
-    // ctx = colorCircleHSL.getContext('2d');
-    // drawOuterColorCircle(ctx,size);
-    // drawInnerColorCircleHSL(ctx,size,rgba);
-
-
 }
