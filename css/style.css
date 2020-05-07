@@ -16,13 +16,29 @@
     pointer-events: none;
 }
 
-.color-circles {
+.color-circle-container {
     width: 250px;
-    height: 250px;
+    height: 290px;
     top: 0px;
     position: fixed;
     background-color: #555;
     z-index: 2147483646;
+    display: flex;
+    flex-direction: column;
+}
+
+.color-value {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 20px;
+    color: #fff;
+    height: 40px;
+}
+
+.color-circle {
+    width: 250px;
+    height: 250px;
+    top: 0px;
     display: flex;
 }
 

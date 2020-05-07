@@ -3,7 +3,6 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     // 二度押しの禁止
     chrome.runtime.sendMessage("activated");
 
-
     // canvasを作りbackground.jsから受け取ったimagePathを流し込み、domへ追加(全面にスクショ画像を表示)
     let canvas = document.createElement('canvas');
     canvas.className = 'screen-shot'
@@ -18,19 +17,32 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorInfo.style.backgroundColor = 'rgba(0,0,0,1)';
     document.body.appendChild(colorInfo);
 
-    // カラーサークルを表示するポップアップ
-    let colorCircles = document.createElement('div');
-    colorCircles.className = 'color-circles';
-    document.body.appendChild(colorCircles);
+    size = 250;
+    colorValueHeight = 40;
 
-    let size = 250;
+    let colorCircleContainer = document.createElement('div');
+    colorCircleContainer.className = 'color-circle-container';
+    colorCircleContainer.style.width = size;
+    colorCircleContainer.style.height = size + colorValueHeight;
+    document.body.appendChild(colorCircleContainer);
+
+    // カラーサークルを表示するポップアップ
+    let colorCircle = document.createElement('div');
+    colorCircle.className = 'color-circle';
+    colorCircleContainer.appendChild(colorCircle);
+
+    let colorValue = document.createElement('div');
+    colorValue.className = 'color-value';
+    colorValue.style.width = size;
+    colorValue.style.height = colorValueHeight;
+    colorCircleContainer.appendChild(colorValue);
 
     // HSVの静的エレメント(外輪)
     let staticColorCircleHSV = document.createElement('canvas');
     staticColorCircleHSV.className = 'color-circle';
     staticColorCircleHSV.width = size;
     staticColorCircleHSV.height = size;
-    colorCircles.appendChild(staticColorCircleHSV);
+    colorCircle.appendChild(staticColorCircleHSV);
     let ctxSHSV = staticColorCircleHSV.getContext('2d');
     drawOuterColorCircle(ctxSHSV, size)
 
@@ -40,7 +52,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     dynamicColorCircleHSV.style = 'position:absolute;top:0;left:0;';
     dynamicColorCircleHSV.height = size;
     dynamicColorCircleHSV.width = size;
-    colorCircles.appendChild(dynamicColorCircleHSV);
+    colorCircle.appendChild(dynamicColorCircleHSV);
     let ctxDHSV = dynamicColorCircleHSV.getContext('2d');
     drawInnerColorCircleHSV(ctxDHSV, size, [255, 255, 255, 255]);
 
@@ -49,7 +61,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     staticColorCircleHSL.className = 'color-circle';
     staticColorCircleHSL.width = size;
     staticColorCircleHSL.height = size;
-    colorCircles.appendChild(staticColorCircleHSL);
+    colorCircle.appendChild(staticColorCircleHSL);
     let ctxSHSL = staticColorCircleHSL.getContext('2d');
     // drawOuterColorCircle(ctxSHSL, size)
 
@@ -59,24 +71,59 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     dynamicColorCircleHSL.style = 'position:absolute;top:0;right:0;';
     dynamicColorCircleHSL.height = size;
     dynamicColorCircleHSL.width = size;
-    colorCircles.appendChild(dynamicColorCircleHSL);
+    colorCircle.appendChild(dynamicColorCircleHSL);
     let ctxDHSL = dynamicColorCircleHSL.getContext('2d');
     // drawInnerColorCircleHSL(ctxDHSL, size, [255, 255, 255, 255]);
 
+
+    colorCircle.onclick = () => {
+        isHSV = !isHSV;
+        if (isHSV) {
+            dynamicColorCircleHSV.style.display = 'block';
+            dynamicColorCircleHSL.style.display = 'none';
+            drawOuterColorCirclePoint(ctxDHSV, size, imageData.data);
+            drawInnerColorCircleHSV(ctxDHSV, size, imageData.data);
+            drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
+        } else {
+            dynamicColorCircleHSV.style.display = 'none';
+            dynamicColorCircleHSL.style.display = 'block';
+            drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
+            drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
+            drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
+        }
+    }
+
+    let colorValueClickCounter = 0;
+    let startMode = 2;
+    let valueModesHSV = ["HexRGB","RGB","HSV"];
+    let valueModesHSL = ["HexRGB","RGB","HSL"];
+    let valueMode = valueModesHSV[startMode];
+    colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
+    colorValue.onclick = () => {
+        colorValueClickCounter ++;
+        if (isHSV) {
+            valueMode = valueModesHSV[(startMode + colorValueClickCounter) % 3];
+            colorValue.textContent = valueModeText(valueMode, imageData);
+        } else {
+            valueMode = valueModesHSL[(startMode + colorValueClickCounter) % 3];
+            colorValue.textContent = valueModeText(valueMode, imageData);
+        }
+    }
+
+
+
     let clickCount = 0;
-    debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles),1);
+    debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircleContainer, valueMode, isHSV),1);
     window.addEventListener('mousemove', debounce);
 
     canvas.addEventListener('click',function(){
         clickCount ++;
         if (clickCount % 2 == 1){
             window.removeEventListener('mousemove', debounce);
-            colorInfo.style.opacity = 0.65;
-            // colorInfo.style.display = 'none';
+            colorInfo.style.opacity = 0.6;
         } else {
             window.addEventListener('mousemove', debounce);
             colorInfo.style.opacity = 1;
-            // colorInfo.style.display = 'inline';
         }
     });
 
@@ -87,12 +134,13 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
 });
 
+
 // 終了処理
-function quit(e,isQuit){
+function quit(e){
     if (e.keyCode == 27) {
         chrome.runtime.sendMessage("quit");
         window.removeEventListener('mousemove',debounce);
-        a = document.body.getElementsByClassName("color-circles");
+        a = document.body.getElementsByClassName("color-circle-container");
         b = document.body.getElementsByClassName("mouse-tracker");
         c = document.body.getElementsByClassName("screen-shot");
         document.body.removeChild(a[0]);
@@ -103,32 +151,59 @@ function quit(e,isQuit){
 }
 
 // マウスの移動によって描画を更新
-function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles) {
+function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircleContainer, valueMode, isHSV) {
     let mousePos = getMousePosition(e);
     // console.log(mousePos);
     imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
 
-    if (mousePos.x < size + 30 && mousePos.y < size + 30) {
-        colorCircles.style.right = "0";
-        colorCircles.style.left = "auto";
+    if (mousePos.x < size + 30 && mousePos.y < size + 30 + 40) {
+        colorCircleContainer.style.right = "0";
+        colorCircleContainer.style.left = "auto";
     } else {
-        colorCircles.style.right = "auto";
-        colorCircles.style.left = "0";
+        colorCircleContainer.style.right = "auto";
+        colorCircleContainer.style.left = "0";
     }
+
+
+    colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
+    colorValue.textContent = valueModeText(valueMode, imageData);
+
 
     magnifier(mousePos, ctx);
     colorInfo.style.top = mousePos.y+10 + "px";
     colorInfo.style.left = mousePos.x+10 + "px";
 
-    // HSVのプロットと四角の描画を更新
-    drawOuterColorCirclePoint(ctxDHSV, size, imageData.data);
-    drawInnerColorCircleHSV(ctxDHSV, size, imageData.data);
-    drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
+    if (isHSV) {
+        drawOuterColorCirclePoint(ctxDHSV, size, imageData.data);
+        drawInnerColorCircleHSV(ctxDHSV, size, imageData.data);
+        drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
+    } else {
+        drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
+        drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
+        drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
+    }
 
-    // HSLのプロットと三角の描画を更新
-    // drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
-    // drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
-    // drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
+    
+}
+
+function valueModeText(valueMode,imageData) {
+    let text;
+    r = imageData.data[0];
+    g = imageData.data[1];
+    b = imageData.data[2];
+    colorValue = document.body.getElementsByClassName('colorValue')[0];
+    if (valueMode == 'HexRGB') {
+        text = '#' + r.toString(16) + g.toString(16) + b.toString(16);
+    } else if (valueMode == 'RGB') {
+        text = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+    } else if (valueMode == 'HSV') {
+        hsv = RGBtoHSVorHSL(imageData.data,'HSV');
+        text = 'hsv(' + hsv[0] + ', ' + hsv[1] + '%, ' + hsv[2] + '%)';
+    } else if (valueMode == 'HSL') {
+        hsl = RGBtoHSVorHSL(imageData.data,'HSL');
+        text = 'hsl(' + hsl[0] + ', ' + hsl[1] + '%, ' + hsl[2] + '%)';
+    }
+    return text;
 }
 
 // 拡大鏡
@@ -141,7 +216,7 @@ function magnifier(mousePos, ctx) {
 
     unitSquareSize = Math.floor(magnifierPopupSize / magnifierGridSize); // 整数である必要がある
     ctxMT = mt.getContext('2d');
-    imageDataForMagnifier = ctx.getImageData(mousePos.x*window.devicePixelRatio　- Math.floor(magnifierGridSize/2),mousePos.y*window.devicePixelRatio - Math.floor(magnifierGridSize/2),magnifierGridSize,magnifierGridSize);
+    imageDataForMagnifier = ctx.getImageData(mousePos.x*window.devicePixelRatio - Math.floor(magnifierGridSize/2),mousePos.y*window.devicePixelRatio - Math.floor(magnifierGridSize/2),magnifierGridSize,magnifierGridSize);
     let w = unitSquareSize;
     let h = unitSquareSize;
     let offsetX = Math.floor((magnifierPopupSize - (magnifierGridSize + 3) * unitSquareSize) / 2);
