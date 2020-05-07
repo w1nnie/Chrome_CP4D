@@ -44,31 +44,28 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     drawInnerColorCircleHSV(ctxDHSV, size, [255, 255, 255, 255]);
 
     // HSLの静的エレメント(外輪)
-    // let staticColorCircleHSL = document.createElement('canvas');
-    // staticColorCircleHSL.className = 'color-circle';
-    // staticColorCircleHSL.width = size;
-    // staticColorCircleHSL.height = size;
-    // colorCircles.appendChild(staticColorCircleHSL);
-    // let ctxSHSL = staticColorCircleHSL.getContext('2d');
+    let staticColorCircleHSL = document.createElement('canvas');
+    staticColorCircleHSL.className = 'color-circle';
+    staticColorCircleHSL.width = size;
+    staticColorCircleHSL.height = size;
+    colorCircles.appendChild(staticColorCircleHSL);
+    let ctxSHSL = staticColorCircleHSL.getContext('2d');
     // drawOuterColorCircle(ctxSHSL, size)
 
     // HSLの動的エレメント(内部, プロット)
-    // let dynamicColorCircleHSL = document.createElement('canvas');
-    // dynamicColorCircleHSL.className = 'color-circle';
-    // dynamicColorCircleHSL.style = 'position:absolute;top:0;right:0;';
-    // dynamicColorCircleHSL.height = size;
-    // dynamicColorCircleHSL.width = size;
-    // colorCircles.appendChild(dynamicColorCircleHSL);
-    // let ctxDHSL = dynamicColorCircleHSL.getContext('2d');
+    let dynamicColorCircleHSL = document.createElement('canvas');
+    dynamicColorCircleHSL.className = 'color-circle';
+    dynamicColorCircleHSL.style = 'position:absolute;top:0;right:0;';
+    dynamicColorCircleHSL.height = size;
+    dynamicColorCircleHSL.width = size;
+    colorCircles.appendChild(dynamicColorCircleHSL);
+    let ctxDHSL = dynamicColorCircleHSL.getContext('2d');
     // drawInnerColorCircleHSL(ctxDHSL, size, [255, 255, 255, 255]);
 
 
-    const event_listeners = {};
-    debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, null, size, colorCircles),1);
-    // mousemoveを検知してimageDataを取得、カラーサークルを更新
+    debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles),1);
     document.body.addEventListener('mousemove', debounce);
 
-    console.log("ha?");
     document.body.addEventListener('click',function(){
         document.body.removeEventListener('mousemove', debounce);
     });
@@ -89,6 +86,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
 });
 
+// マウスの移動によって描画を更新
 function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles) {
     let mousePos = getMousePosition(e);
     console.log(mousePos);
@@ -206,8 +204,8 @@ function draw(canvas,imagePath,ctx) {
 // ポインタの座標を取得(retina displayだと2倍(?))
 function getMousePosition(e) {
     return {
-        x: parseInt(e.offsetX),
-        y: parseInt(e.offsetY)
+        x: parseInt(e.clientX),
+        y: parseInt(e.clientY)
     };
 }
 
