@@ -39,9 +39,10 @@
     height: 40px;
     cursor: pointer;
     user-select: none;
+    font-family: 'sans-serif';
 }
 .color-value:hover {
-    background-color: rgba(255,255,255,0.05);
+    background-color: rgba(255,255,255,0.1);
 }
 
 .color-circle {

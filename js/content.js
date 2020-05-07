@@ -61,6 +61,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     staticColorCircleHSL.className = 'color-circle';
     staticColorCircleHSL.width = size;
     staticColorCircleHSL.height = size;
+    staticColorCircleHSL.style = "position: absolute; top: 0; left: 0";
     colorCircle.appendChild(staticColorCircleHSL);
     let ctxSHSL = staticColorCircleHSL.getContext('2d');
     // drawOuterColorCircle(ctxSHSL, size)
@@ -68,7 +69,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     // HSLの動的エレメント(内部, プロット)
     let dynamicColorCircleHSL = document.createElement('canvas');
     dynamicColorCircleHSL.className = 'color-circle';
-    dynamicColorCircleHSL.style = 'position:absolute;top:0;right:0;';
+    dynamicColorCircleHSL.style = 'position: absolute; top: 0; left: 0;';
     dynamicColorCircleHSL.height = size;
     dynamicColorCircleHSL.width = size;
     colorCircle.appendChild(dynamicColorCircleHSL);
@@ -89,6 +90,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
             drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
             valueMode = valueModesHSV[(startMode + colorValueClickCounter) % 3];
             colorValue.textContent = valueModeText(valueMode, imageData);
+            console.log(valueMode);
         } else {
             dynamicColorCircleHSV.style.display = 'none';
             dynamicColorCircleHSL.style.display = 'block';
@@ -199,7 +201,25 @@ function valueModeText(valueMode,imageData) {
     b = imageData.data[2];
     colorValue = document.body.getElementsByClassName('colorValue')[0];
     if (valueMode == 'HexRGB') {
-        text = '#' + r.toString(16) + g.toString(16) + b.toString(16);
+        let rStr;
+        let gStr;
+        let bStr;
+        if (r < 16) {
+            rStr = '0' + r.toString(16);
+        } else {
+            rStr = r.toString(16);
+        }
+        if (g < 16) {
+            gStr = '0' + g.toString(16);
+        } else {
+            gStr = g.toString(16);
+        }
+        if (b < 16) {
+            bStr = '0' + b.toString(16);
+        } else {
+            bStr = b.toString(16);
+        }
+        text = '#' + rStr + gStr + bStr;
     } else if (valueMode == 'RGB') {
         text = 'rgb(' + r + ', ' + g + ', ' + b + ')';
     } else if (valueMode == 'HSV') {
