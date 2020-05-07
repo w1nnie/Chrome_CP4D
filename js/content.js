@@ -62,17 +62,19 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     // let ctxDHSL = dynamicColorCircleHSL.getContext('2d');
     // drawInnerColorCircleHSL(ctxDHSL, size, [255, 255, 255, 255]);
 
-    // mousemoveを検知してimageDataを取得、カラーサークルを更新
-    canvas.addEventListener('mousemove',_.debounce(function(e) {
-        updateColorCircle(e, ctx, colorInfo, ctxDHSV, null, size, colorCircles);
-    },1));
 
-    canvas.addEventListener('click',function(e){
-        canvas.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, null, size, colorCircles));
+    const event_listeners = {};
+    debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, null, size, colorCircles),1);
+    // mousemoveを検知してimageDataを取得、カラーサークルを更新
+    document.body.addEventListener('mousemove', debounce);
+
+    console.log("ha?");
+    document.body.addEventListener('click',function(){
+        document.body.removeEventListener('mousemove', debounce);
     });
 
     // escキーでdomを削除
-    document.addEventListener("keydown",function(e){
+    document.body.addEventListener("keydown",function(e){
         if (e.keyCode == 27) {
             chrome.runtime.sendMessage("quit");
             a = document.body.getElementsByClassName("color-circles");
@@ -81,11 +83,11 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
             document.body.removeChild(a[0]);
             document.body.removeChild(b[0]);
             document.body.removeChild(c[0]);
-            document.removeEventListener('mousemove',updateColorCircle(e, ctx, colorInfo, ctxDHSV, null, size));
+            document.body.removeEventListener('mousemove',debounce);
         }
     });
 
-}); 
+});
 
 function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircles) {
     let mousePos = getMousePosition(e);
