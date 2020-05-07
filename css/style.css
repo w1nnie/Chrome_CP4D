@@ -28,11 +28,20 @@
 }
 
 .color-value {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    vertical-align: middle;
+    margin: 0px auto;
     font-size: 20px;
     color: #fff;
+    width: 250px;
     height: 40px;
+    cursor: pointer;
+    user-select: none;
+}
+.color-value:hover {
+    background-color: rgba(255,255,255,0.05);
 }
 
 .color-circle {
@@ -40,6 +49,11 @@
     height: 250px;
     top: 0px;
     display: flex;
+    cursor: pointer;
+    user-select: none;
+}
+.color-circle:hover {
+    background-color: rgba(255,255,255,0.05);
 }
 
 .color-circle {

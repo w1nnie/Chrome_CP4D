@@ -76,7 +76,10 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     // drawInnerColorCircleHSL(ctxDHSL, size, [255, 255, 255, 255]);
 
 
-    colorCircle.onclick = () => {
+    colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
+
+    isHSV = true;
+    colorCircle.onclick = (e) => {
         isHSV = !isHSV;
         if (isHSV) {
             dynamicColorCircleHSV.style.display = 'block';
@@ -84,12 +87,16 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
             drawOuterColorCirclePoint(ctxDHSV, size, imageData.data);
             drawInnerColorCircleHSV(ctxDHSV, size, imageData.data);
             drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
+            valueMode = valueModesHSV[(startMode + colorValueClickCounter) % 3];
+            colorValue.textContent = valueModeText(valueMode, imageData);
         } else {
             dynamicColorCircleHSV.style.display = 'none';
             dynamicColorCircleHSL.style.display = 'block';
             drawOuterColorCirclePoint(ctxDHSL, size, imageData.data);
             drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
             drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
+            valueMode = valueModesHSL[(startMode + colorValueClickCounter) % 3];
+            colorValue.textContent = valueModeText(valueMode, imageData);
         }
     }
 
@@ -98,7 +105,6 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     let valueModesHSV = ["HexRGB","RGB","HSV"];
     let valueModesHSL = ["HexRGB","RGB","HSL"];
     let valueMode = valueModesHSV[startMode];
-    colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
     colorValue.onclick = () => {
         colorValueClickCounter ++;
         if (isHSV) {
