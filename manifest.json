@@ -3,7 +3,7 @@
     "author": "",
     "homepage_url": "https://twitter.com/_winnie_ill",
     "name": "Colorpicker",
-    "description": "color",
+    "description": "カラーサークルが見えるカラーピッカー",
     "version": "0.0.1",
     "icons": {
         "16": "image/16.png",
@@ -20,8 +20,7 @@
         "persistent": false
     },
     "browser_action": {
-        "default_icon": "image/48.png",
-        "default_title": "kusa"
+        "default_icon": "image/48.png"
     },
     "permissions": [
         "tabs",

@@ -49,7 +49,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     // HSVの動的エレメント(内部, プロット)
     let dynamicColorCircleHSV = document.createElement('canvas');
     dynamicColorCircleHSV.className = 'color-circle';
-    dynamicColorCircleHSV.style = 'position:absolute;top:0;left:0;';
+    dynamicColorCircleHSV.style = 'position: absolute; top: 0; left: 0;';
     dynamicColorCircleHSV.height = size;
     dynamicColorCircleHSV.width = size;
     colorCircle.appendChild(dynamicColorCircleHSV);
@@ -103,7 +103,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     }
 
     let colorValueClickCounter = 0;
-    let startMode = 2;
+    let startMode = 0;
     let valueModesHSV = ["HexRGB","RGB","HSV"];
     let valueModesHSL = ["HexRGB","RGB","HSL"];
     let valueMode = valueModesHSV[startMode];
@@ -165,12 +165,14 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
     imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
 
     if (mousePos.x < size + 30 && mousePos.y < size + 30 + 40) {
-        colorCircleContainer.style.right = "0";
-        colorCircleContainer.style.left = "auto";
+        colorCircleContainer.style.bottom = "0";
+        colorCircleContainer.style.top = "auto";
     } else {
-        colorCircleContainer.style.right = "auto";
-        colorCircleContainer.style.left = "0";
+        colorCircleContainer.style.bottom = "auto";
+        colorCircleContainer.style.top = "0";
     }
+
+
 
 
     colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
