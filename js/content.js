@@ -180,8 +180,23 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
 
 
     magnifier(mousePos, ctx);
-    colorInfo.style.top = mousePos.y+10 + "px";
-    colorInfo.style.left = mousePos.x+10 + "px";
+    console.log(mousePos);
+    console.log(window.innerWidth);
+    borderX = window.innerWidth - size - 30;
+    borderY = window.innerHeight - size - 30;
+    if (mousePos.x > borderX && mousePos.y < borderY) {
+        colorInfo.style.top = mousePos.y+10 + "px";
+        colorInfo.style.left = (mousePos.x - 10 - size) + "px";
+    } else if (mousePos.x < borderX && mousePos.y > borderY) {
+        colorInfo.style.top = (mousePos.y - 10 - size) + "px";
+        colorInfo.style.left = (mousePos.x + 10) + "px";
+    } else if (mousePos.x > borderX && mousePos.y > borderY) {
+        colorInfo.style.top = (mousePos.y - 10 - size) + "px";
+        colorInfo.style.left = (mousePos.x - 10 - size) + "px";
+    } else {
+        colorInfo.style.top = (mousePos.y + 10) + "px";
+        colorInfo.style.left = (mousePos.x + 10) + "px";
+    }
 
     if (isHSV) {
         drawOuterColorCirclePoint(ctxDHSV, size, imageData.data);
