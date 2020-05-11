@@ -117,7 +117,12 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     }
     let valueModesHSV = ["HexRGB","RGB","HSV"];
     let valueModesHSL = ["HexRGB","RGB","HSL"];
-    let valueMode = valueModesHSV[startMode];
+    let valueMode;
+    if (isHSV) {
+        valueMode = valueModesHSV[startMode];
+    } else {
+        valueMode = valueModesHSL[startMode];
+    }
     colorValue.onclick = () => {
         colorValueClickCounter ++;
         if (isHSV) {

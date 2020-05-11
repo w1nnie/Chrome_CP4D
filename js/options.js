@@ -8,7 +8,7 @@ function save_options() {
         let status = document.getElementById('status');
         status.textContent = 'Options saved.';
         setTimeout(function(){
-            status.textcontent = '';
+            status.textContent = '';
         }, 750)
     });
 }
@@ -20,6 +20,9 @@ function restore_options() {
     }, function(items) {
         document.getElementById('color-space').value = items.colorSpace;
         document.getElementById('color-format').value = items.colorFormat;
+        if(items.colorSpace == 'HSL'){
+            document.getElementById('HS').textContent = 'HSL';
+        }
     });
 }
 

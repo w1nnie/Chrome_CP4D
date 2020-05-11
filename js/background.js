@@ -21,7 +21,6 @@ chrome.browserAction.onClicked.addListener(function(tab) {
     async function sendMessage() {
         getFromStorage();
         du = await capture();
-        console.log(cs,cf,du);
     }
     sendMessage().then(()=>{
         chrome.tabs.sendMessage(tab.id, {colorSpace: cs, colorFormat: cf, message: du});
