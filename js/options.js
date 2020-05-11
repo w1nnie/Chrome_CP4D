@@ -23,5 +23,16 @@ function restore_options() {
     });
 }
 
+
 document.addEventListener('DOMContentLoaded', restore_options);
 document.getElementById('save').addEventListener('click',save_options);
+
+let cs = document.getElementById('color-space');
+cs.addEventListener('change', (e) => {
+    let hs = document.getElementById('HS');
+    if (cs.value == 'HSV'){
+        hs.textContent = 'HSV';
+    } else if (cs.value == 'HSL') {
+        hs.textContent = 'HSL';
+    }
+});

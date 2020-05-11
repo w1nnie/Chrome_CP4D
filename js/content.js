@@ -54,7 +54,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     dynamicColorCircleHSV.width = size;
     colorCircle.appendChild(dynamicColorCircleHSV);
     let ctxDHSV = dynamicColorCircleHSV.getContext('2d');
-    drawInnerColorCircleHSV(ctxDHSV, size, [255, 255, 255, 255]);
+    // drawInnerColorCircleHSV(ctxDHSV, size, [255, 255, 255, 255]);
 
     // HSLの静的エレメント(外輪)
     let staticColorCircleHSL = document.createElement('canvas');
@@ -80,6 +80,11 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
 
     isHSV = true;
+    if (request.colorSpace == 'HSV') {
+        isHSV = true;
+    } else {
+        isHSV = false;
+    }
     colorCircle.onclick = (e) => {
         isHSV = !isHSV;
         if (isHSV) {
@@ -90,7 +95,6 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
             drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
             valueMode = valueModesHSV[(startMode + colorValueClickCounter) % 3];
             colorValue.textContent = valueModeText(valueMode, imageData);
-            console.log(valueMode);
         } else {
             dynamicColorCircleHSV.style.display = 'none';
             dynamicColorCircleHSL.style.display = 'block';
@@ -104,6 +108,13 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
     let colorValueClickCounter = 0;
     let startMode = 0;
+    if (request.colorFormat == 'HexRGB') {
+        startMode = 0;
+    } else if (request.colorFormat == 'RGB') {
+        startMode = 1;
+    } else if (request.colorFormat == 'HS') {
+        startMode = 2;
+    }
     let valueModesHSV = ["HexRGB","RGB","HSV"];
     let valueModesHSL = ["HexRGB","RGB","HSL"];
     let valueMode = valueModesHSV[startMode];
@@ -172,12 +183,8 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
         colorCircleContainer.style.top = "0";
     }
 
-
-
-
     colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
     colorValue.textContent = valueModeText(valueMode, imageData);
-
 
     magnifier(mousePos, ctx);
     borderX = window.innerWidth - size - 30;

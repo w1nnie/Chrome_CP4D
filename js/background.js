@@ -1,7 +1,31 @@
 chrome.browserAction.onClicked.addListener(function(tab) {
-    dataUrl = chrome.tabs.captureVisibleTab(null,{format:"png"},function(dataUrl){
-        chrome.tabs.sendMessage(tab.id, {message: dataUrl});
-    });  
+    let cs,cf,du;
+    function getFromStorage() {
+        chrome.storage.sync.get({
+            colorSpace: 'no data',
+            colorFormat: 'no data f'
+        }, function(items){
+            cs = items.colorSpace;
+            cf = items.colorFormat;
+            console.log(items.colorSpace,items.colorFormat);
+        });
+    }
+    function capture() {
+        return new Promise(resolve => {
+            chrome.tabs.captureVisibleTab(null,{format:"png"},function(dataUrl){
+            resolve(dataUrl);
+            })
+        });
+    };
+
+    async function sendMessage() {
+        getFromStorage();
+        du = await capture();
+        console.log(cs,cf,du);
+    }
+    sendMessage().then(()=>{
+        chrome.tabs.sendMessage(tab.id, {colorSpace: cs, colorFormat: cf, message: du});
+    });
 });
 
 chrome.runtime.onMessage.addListener(
@@ -16,10 +40,8 @@ chrome.runtime.onMessage.addListener(
 );
 
 chrome.tabs.onUpdated.addListener(function(){
-        chrome.browserAction.enable();
-    }
-);
+    chrome.browserAction.enable();
+});
 chrome.tabs.onRemoved.addListener(function(){
     chrome.browserAction.enable();
-}
-);
+});
