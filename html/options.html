@@ -3,9 +3,24 @@
 <head><title>Extension Options</title></head>
 <body>
 
-a
+start with
 
-<script src="options.js"></script>
+color space
+<select id="color-space">
+    <option value="HSV">HSV</option>
+    <option value="HSL">HSL</option>
+</select>
+
+<select id="color-format">
+    <option value="HexRGB">HexRGB</option>
+    <option value="RGB">RGB</option>
+    <option value="HSVorHSL">HSV</option>
+</select>
+
+<div id="status"></div>
+<button id="save">Save</button>
+
+<script src="../js/options.js"></script>
 
 </body>
 </html>

@@ -19,6 +19,7 @@
         "scripts": ["js/background.js"],
         "persistent": false
     },
+    "options_page": "html/options.html",
     "browser_action": {
         "default_icon": "image/48.png"
     },

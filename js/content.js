@@ -180,8 +180,6 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
 
 
     magnifier(mousePos, ctx);
-    console.log(mousePos);
-    console.log(window.innerWidth);
     borderX = window.innerWidth - size - 30;
     borderY = window.innerHeight - size - 30;
     if (mousePos.x > borderX && mousePos.y < borderY) {
