@@ -17,8 +17,8 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorInfo.style.backgroundColor = 'rgba(0,0,0,1)';
     document.body.appendChild(colorInfo);
 
-    size = 250;
-    colorValueHeight = 40;
+    size = parseInt(request.popupSize);
+    colorValueHeight = parseInt(size/6);
 
     let colorCircleContainer = document.createElement('div');
     colorCircleContainer.className = 'color-circle-container';
@@ -35,6 +35,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorValue.className = 'color-value';
     colorValue.style.width = size;
     colorValue.style.height = colorValueHeight;
+    colorValue.style.fontSize = parseInt(size/12) + 'px';
     colorCircleContainer.appendChild(colorValue);
 
     // HSVの静的エレメント(外輪)

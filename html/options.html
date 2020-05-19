@@ -3,21 +3,26 @@
 <head><title>Extension Options</title></head>
 <body>
 
-start with
-<br><br><br>
-color space:
+<h2>Startup Option</h2>
+<br>
+<span>Color space:</span>
 <select id="color-space">
     <option value="HSV">HSV</option>
     <option value="HSL">HSL</option>
 </select>
 
 <br><br>
-value:
+<span>Format of pixel value:</span>
 <select id="color-format">
     <option value="HexRGB">HexRGB</option>
     <option value="RGB">RGB</option>
     <option value="HS" id="HS">HSV</option>
 </select>
+
+<br><br>
+<span>Popup Size</span>
+<input id="popup-size" type="number" value="250" min="1">
+<span>px</span>
 
 <br><br>
 <div id="status"></div>
@@ -27,3 +32,12 @@ value:
 
 </body>
 </html>
+
+<style>
+    h2 {
+        font-size: 2em;
+    }
+    span {
+        font-size: 1.5em;
+    }
+</style>

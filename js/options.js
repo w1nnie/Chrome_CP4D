@@ -1,9 +1,11 @@
 function save_options() {
     let cs = document.getElementById('color-space').value;
     let cf = document.getElementById('color-format').value;
+    let sz = document.getElementById('popup-size').value;
     chrome.storage.sync.set({
         colorSpace: cs,
-        colorFormat: cf
+        colorFormat: cf,
+        popupSize: sz
     }, function() {
         let status = document.getElementById('status');
         status.textContent = 'Options saved.';
@@ -16,10 +18,13 @@ function save_options() {
 function restore_options() {
     chrome.storage.sync.get({
         colorSpace: 'HSV',
-        colorFormat: 'HexRGB'
+        colorFormat: 'HexRGB',
+        popupSize: '250'
     }, function(items) {
         document.getElementById('color-space').value = items.colorSpace;
         document.getElementById('color-format').value = items.colorFormat;
+        document.getElementById('popup-size').value = items.popupSize;
+        console.log(items.popupSize);
         if(items.colorSpace == 'HSL'){
             document.getElementById('HS').textContent = 'HSL';
         }

@@ -3,11 +3,12 @@ chrome.browserAction.onClicked.addListener(function(tab) {
     function getFromStorage() {
         chrome.storage.sync.get({
             colorSpace: 'no data',
-            colorFormat: 'no data f'
+            colorFormat: 'no data',
+            popupSize: 'no data'
         }, function(items){
             cs = items.colorSpace;
             cf = items.colorFormat;
-            console.log(items.colorSpace,items.colorFormat);
+            sz = items.popupSize;
         });
     }
     function capture() {
@@ -23,7 +24,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
         du = await capture();
     }
     sendMessage().then(()=>{
-        chrome.tabs.sendMessage(tab.id, {colorSpace: cs, colorFormat: cf, message: du});
+        chrome.tabs.sendMessage(tab.id, {colorSpace: cs, colorFormat: cf,popupSize: sz, message: du});
     });
 });
 
