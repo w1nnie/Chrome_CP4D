@@ -4,10 +4,12 @@ chrome.browserAction.onClicked.addListener(function(tab) {
         chrome.storage.sync.get({
             colorSpace: 'no data',
             colorFormat: 'no data',
+            HSLorHLS: 'no data',
             popupSize: 'no data'
         }, function(items){
             cs = items.colorSpace;
             cf = items.colorFormat;
+            sol = items.HSLorHLS;
             sz = items.popupSize;
         });
     }
@@ -24,7 +26,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
         du = await capture();
     }
     sendMessage().then(()=>{
-        chrome.tabs.sendMessage(tab.id, {colorSpace: cs, colorFormat: cf,popupSize: sz, message: du});
+        chrome.tabs.sendMessage(tab.id, {colorSpace: cs, colorFormat: cf, HSLorHLS: sol, popupSize: sz, message: du});
     });
 });
 

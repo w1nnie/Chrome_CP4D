@@ -79,6 +79,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
 
     colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
+    HSLorHLS = request.HSLorHLS;
 
     isHSV = true;
     if (request.colorSpace == 'HSV') {
@@ -95,7 +96,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
             drawInnerColorCircleHSV(ctxDHSV, size, imageData.data);
             drawInnerColorCircleHSVPoint(ctxDHSV, size, imageData.data);
             valueMode = valueModesHSV[(startMode + colorValueClickCounter) % 3];
-            colorValue.textContent = valueModeText(valueMode, imageData);
+            colorValue.textContent = valueModeText(valueMode, HSLorHLS, imageData);
         } else {
             dynamicColorCircleHSV.style.display = 'none';
             dynamicColorCircleHSL.style.display = 'block';
@@ -103,7 +104,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
             drawInnerColorCircleHSL(ctxDHSL, size, imageData.data);
             drawInnerColorCircleHSLPoint(ctxDHSL, size, imageData.data);
             valueMode = valueModesHSL[(startMode + colorValueClickCounter) % 3];
-            colorValue.textContent = valueModeText(valueMode, imageData);
+            colorValue.textContent = valueModeText(valueMode, HSLorHLS, imageData);
         }
     }
 
@@ -128,17 +129,17 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
         colorValueClickCounter ++;
         if (isHSV) {
             valueMode = valueModesHSV[(startMode + colorValueClickCounter) % 3];
-            colorValue.textContent = valueModeText(valueMode, imageData);
+            colorValue.textContent = valueModeText(valueMode, HSLorHLS, imageData);
         } else {
             valueMode = valueModesHSL[(startMode + colorValueClickCounter) % 3];
-            colorValue.textContent = valueModeText(valueMode, imageData);
+            colorValue.textContent = valueModeText(valueMode, HSLorHLS, imageData);
         }
     }
 
 
 
     let clickCount = 0;
-    debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircleContainer, valueMode, isHSV),1);
+    debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircleContainer, valueMode, isHSV, HSLorHLS),1);
     window.addEventListener('mousemove', debounce);
 
     canvas.addEventListener('click',function(){
@@ -176,7 +177,7 @@ function quit(e){
 }
 
 // マウスの移動によって描画を更新
-function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircleContainer, valueMode, isHSV) {
+function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircleContainer, valueMode, isHSV, HSLorHLS) {
     let mousePos = getMousePosition(e);
     // console.log(mousePos);
     imageData = ctx.getImageData(mousePos.x*window.devicePixelRatio,mousePos.y*window.devicePixelRatio,1,1);
@@ -190,7 +191,7 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
     }
 
     colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
-    colorValue.textContent = valueModeText(valueMode, imageData);
+    colorValue.textContent = valueModeText(valueMode, HSLorHLS, imageData);
 
     magnifier(mousePos, ctx);
     borderX = window.innerWidth - size - 30;
@@ -222,7 +223,7 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
     
 }
 
-function valueModeText(valueMode,imageData) {
+function valueModeText(valueMode, HSLorHLS, imageData) {
     let text;
     r = imageData.data[0];
     g = imageData.data[1];
@@ -253,9 +254,12 @@ function valueModeText(valueMode,imageData) {
     } else if (valueMode == 'HSV') {
         hsv = RGBtoHSVorHSL(imageData.data,'HSV');
         text = 'hsv(' + hsv[0] + ', ' + hsv[1] + '%, ' + hsv[2] + '%)';
-    } else if (valueMode == 'HSL') {
+    } else if (valueMode == 'HSL' && HSLorHLS == 'HSL') {
         hsl = RGBtoHSVorHSL(imageData.data,'HSL');
         text = 'hsl(' + hsl[0] + ', ' + hsl[1] + '%, ' + hsl[2] + '%)';
+    } else if (valueMode == 'HSL' && HSLorHLS == 'HLS') {
+        hsl = RGBtoHSVorHSL(imageData.data,'HSL');
+        text = 'hls(' + hsl[0] + ', ' + hsl[2] + '%, ' + hsl[1] + '%)';
     }
     return text;
 }
