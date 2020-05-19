@@ -17,6 +17,13 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     colorInfo.style.backgroundColor = 'rgba(0,0,0,1)';
     document.body.appendChild(colorInfo);
 
+    let collapseButton = document.createElement('div');
+    collapseButton.className = 'collapse-button';
+    collapseButton.textContent = '×';
+    collapseButton.style.width = '35px';
+    collapseButton.style.height = '35px';
+    document.body.appendChild(collapseButton);
+
     size = parseInt(request.popupSize);
     colorValueHeight = parseInt(size/6);
 
@@ -147,15 +154,18 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
         if (clickCount % 2 == 1){
             window.removeEventListener('mousemove', debounce);
             colorInfo.style.opacity = 0.6;
+            collapseButton.style.display = 'inline';
         } else {
             window.addEventListener('mousemove', debounce);
             colorInfo.style.opacity = 1;
+            collapseButton.style.display = 'none';
         }
     });
 
     // escキーでdomを削除
     quitEvent = e => quit(e);
     window.addEventListener("keyup",quitEvent);
+    collapseButton.addEventListener("click",quitEvent);
 
 
 });
@@ -163,16 +173,19 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
 // 終了処理
 function quit(e){
-    if (e.keyCode == 27) {
+    if (e.keyCode == 27 || e.type == "click") {
         chrome.runtime.sendMessage("quit");
         window.removeEventListener('mousemove',debounce);
         a = document.body.getElementsByClassName("color-circle-container");
         b = document.body.getElementsByClassName("mouse-tracker");
         c = document.body.getElementsByClassName("screen-shot");
+        d = document.body.getElementsByClassName("collapse-button");
         document.body.removeChild(a[0]);
         document.body.removeChild(b[0]);
         document.body.removeChild(c[0]);
+        document.body.removeChild(d[0]);
         window.removeEventListener("keyup",quitEvent);
+        collapseButton.removeEventListener("click",quitEvent);
     }
 }
 
@@ -192,22 +205,33 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
 
     colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
     colorValue.textContent = valueModeText(valueMode, HSLorHLS, imageData);
+    collapseButton = document.getElementsByClassName('collapse-button')[0];
 
     magnifier(mousePos, ctx);
-    borderX = window.innerWidth - size - 30;
-    borderY = window.innerHeight - size - 30;
+    magnifierPopupSize = 236;
+    collapseButtonSize = 35;
+    borderX = window.innerWidth - magnifierPopupSize - 30;
+    borderY = window.innerHeight - magnifierPopupSize - 30;
     if (mousePos.x > borderX && mousePos.y < borderY) {
-        colorInfo.style.top = mousePos.y+10 + "px";
-        colorInfo.style.left = (mousePos.x - 10 - size) + "px";
+        colorInfo.style.top = (mousePos.y + 10) + "px";
+        colorInfo.style.left = (mousePos.x - 10 - magnifierPopupSize) + "px";
+        collapseButton.style.top = (mousePos.y + 10) + "px";
+        collapseButton.style.left = (mousePos.x - 10 - collapseButtonSize) +"px"
     } else if (mousePos.x < borderX && mousePos.y > borderY) {
-        colorInfo.style.top = (mousePos.y - 10 - size) + "px";
+        colorInfo.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
         colorInfo.style.left = (mousePos.x + 10) + "px";
+        collapseButton.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
+        collapseButton.style.left = (mousePos.x + 10 + magnifierPopupSize - collapseButtonSize) + "px";
     } else if (mousePos.x > borderX && mousePos.y > borderY) {
-        colorInfo.style.top = (mousePos.y - 10 - size) + "px";
-        colorInfo.style.left = (mousePos.x - 10 - size) + "px";
+        colorInfo.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
+        colorInfo.style.left = (mousePos.x - 10 - magnifierPopupSize) + "px";
+        collapseButton.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
+        collapseButton.style.left = (mousePos.x - 10 - collapseButtonSize) + "px";
     } else {
         colorInfo.style.top = (mousePos.y + 10) + "px";
         colorInfo.style.left = (mousePos.x + 10) + "px";
+        collapseButton.style.top = (mousePos.y + 10) + "px";
+        collapseButton.style.left = (mousePos.x + 10 + magnifierPopupSize - collapseButtonSize) + "px";
     }
 
     if (isHSV) {
@@ -257,6 +281,7 @@ function valueModeText(valueMode, HSLorHLS, imageData) {
     } else if (valueMode == 'HSL' && HSLorHLS == 'HSL') {
         hsl = RGBtoHSVorHSL(imageData.data,'HSL');
         text = 'hsl(' + hsl[0] + ', ' + hsl[1] + '%, ' + hsl[2] + '%)';
+
     } else if (valueMode == 'HSL' && HSLorHLS == 'HLS') {
         hsl = RGBtoHSVorHSL(imageData.data,'HSL');
         text = 'hls(' + hsl[0] + ', ' + hsl[2] + '%, ' + hsl[1] + '%)';
