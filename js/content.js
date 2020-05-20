@@ -25,6 +25,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     document.body.appendChild(collapseButton);
 
     size = parseInt(request.popupSize);
+    if(isNaN(size)){size = 250;}
     colorValueHeight = parseInt(size/6);
 
     let colorCircleContainer = document.createElement('div');

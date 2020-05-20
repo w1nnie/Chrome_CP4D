@@ -2,10 +2,10 @@ chrome.browserAction.onClicked.addListener(function(tab) {
     let cs,cf,du;
     function getFromStorage() {
         chrome.storage.sync.get({
-            colorSpace: 'no data',
-            colorFormat: 'no data',
-            HSLorHLS: 'no data',
-            popupSize: 'no data'
+            colorSpace: 'HSV',
+            colorFormat: 'HexRGB',
+            HSLorHLS: 'HSL',
+            popupSize: '250'
         }, function(items){
             cs = items.colorSpace;
             cf = items.colorFormat;

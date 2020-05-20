@@ -27,6 +27,7 @@
     display: none;
     z-index: 2147483647;
     font-size: 35px;
+    line-height: 35px;
     cursor: pointer;
     user-select: none;
 }
@@ -50,6 +51,7 @@
     cursor: pointer;
     user-select: none;
     font-family: 'sans-serif';
+    margin: 0
 }
 .color-value:hover {
     background-color: rgba(255,255,255,0.1);

@@ -1,9 +1,8 @@
 {
     "manifest_version": 2,
-    "author": "",
-    "name": "Colorpicker",
-    "description": "カラーサークルが見えるカラーピッカー",
-    "version": "0.0.1",
+    "name": "ColorPicker with ColorCircle",
+    "description": "カラーサークル上でのピクセル値の位置が見えるカラーピッカーです。",
+    "version": "0.1.0",
     "icons": {
         "16": "image/16.png",
         "48": "image/48.png",
