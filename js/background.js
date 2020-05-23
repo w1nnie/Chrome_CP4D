@@ -1,5 +1,6 @@
 chrome.browserAction.onClicked.addListener(function(tab) {
     let cs,cf,du;
+    chrome.browserAction.disable();
     function getFromStorage() {
         chrome.storage.sync.get({
             colorSpace: 'HSV',
