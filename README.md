@@ -8,6 +8,6 @@
 
 主にイラストなどの創作活動を行う方向けです。
 
-https://chrome.google.com/webstore/detail/colorpicker-with-colorcir/ibpfjoicndbgalmjigfplcdjoabhdmnh
+[chrome ウェブストア]https://chrome.google.com/webstore/detail/colorpicker-with-colorcir/ibpfjoicndbgalmjigfplcdjoabhdmnh
 ![](image/1280_800.png)
 
