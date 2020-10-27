@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "ColorPicker with ColorCircle",
     "description": "カラーサークル上でのピクセル値の位置が見えるカラーピッカーです。",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "icons": {
         "16": "image/16.png",
         "48": "image/48.png",
