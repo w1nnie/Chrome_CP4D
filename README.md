@@ -1,5 +1,7 @@
 # ColorPicker with ColorCircle
 
+[chrome ウェブストア](https://chrome.google.com/webstore/detail/colorpicker-with-colorcir/ibpfjoicndbgalmjigfplcdjoabhdmnh)
+
 カラーサークル上でのピクセル値の座標が見えるカラーピッカーです。
 画像のピクセル値も調べることができるため、イラスト制作等の補助としても使えます。
 
@@ -17,7 +19,5 @@
 - 左上に表示されるポップアップのサイズ
 を設定することができます。
 
-
-[chrome ウェブストア](https://chrome.google.com/webstore/detail/colorpicker-with-colorcir/ibpfjoicndbgalmjigfplcdjoabhdmnh)
 ![](image/1280_800.png)
 
