@@ -1,6 +1,6 @@
-chrome.browserAction.onClicked.addListener(function(tab) {
+chrome.action.onClicked.addListener(function(tab) {
     let cs,cf,du;
-    chrome.browserAction.disable();
+    chrome.action.disable();
     function getFromStorage() {
         chrome.storage.sync.get({
             colorSpace: 'HSV',
@@ -34,17 +34,17 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 chrome.runtime.onMessage.addListener(
 	function(request,sender,sendResponse){
         if (request == "activated") {
-            chrome.browserAction.disable();
+            chrome.action.disable();
         }
         if (request == "quit") {
-            chrome.browserAction.enable();
+            chrome.action.enable();
         }
 	}
 );
 
 chrome.tabs.onUpdated.addListener(function(){
-    chrome.browserAction.enable();
+    chrome.action.enable();
 });
 chrome.tabs.onRemoved.addListener(function(){
-    chrome.browserAction.enable();
+    chrome.action.enable();
 });

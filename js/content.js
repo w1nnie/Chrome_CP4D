@@ -1,4 +1,4 @@
-chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
     // 二度押しの禁止
     chrome.runtime.sendMessage("activated");

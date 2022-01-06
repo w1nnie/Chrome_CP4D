@@ -1,8 +1,8 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "ColorPicker with ColorCircle",
-    "description": "カラーサークル上でのピクセル値の位置が見えるカラーピッカーです。",
-    "version": "0.2.0",
+    "description": "取得した色のカラーサークル上の位置がわかるカラーピッカーです。",
+    "version": "1.0.0",
     "icons": {
         "16": "image/16.png",
         "48": "image/48.png",
@@ -14,18 +14,21 @@
         "css": ["css/style.css"]
     }],
     "background": {
-        "scripts": ["js/background.js"],
-        "persistent": false
+        "service_worker": "js/background.js"
     },
     "options_page": "html/options.html",
-    "browser_action": {
+    "action": {
         "default_icon": "image/48.png"
     },
     "permissions": [
-        "tabs",
         "background",
         "storage",
         "activeTab"
     ],
-    "web_accessible_resources": ["js/*"]
+    "web_accessible_resources": [
+        {
+            "resources": ["/js/*"],
+            "matches": ["<all_urls>"]
+        }
+    ]
 }
