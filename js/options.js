@@ -10,7 +10,7 @@ function save_options() {
         popupSize: sz
     }, function() {
         let status = document.getElementById('status');
-        status.textContent = 'Options saved.';
+        status.textContent = '設定を保存しました。';
         setTimeout(function(){
             status.textContent = '';
         }, 750)

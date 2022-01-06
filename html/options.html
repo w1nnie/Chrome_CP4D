@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html>
-<head><title>Extension Options</title></head>
-<body>
-    
+<head>
+    <meta charset="UTF-8">
+    <title>Extension Options</title>
+</head>
+
+<body>    
 <div class="content">
     <h2>起動時の設定</h2>
     <br>
-    <span>色空間の種類： </span>
+    <span>・色空間の種類： </span>
     <select id="color-space">
         <option value="HSV">HSV</option>
         <option value="HSL">HSL</option>
     </select>
 
     <br><br>
-    <span>色の表記： </span>
+    <span>・色の表記： </span>
     <select id="color-format">
         <option value="HexRGB">HexRGB</option>
         <option value="RGB">RGB</option>
@@ -21,20 +24,20 @@
     </select>
 
     <br><br>
-    <span>(HSL色空間を使用時)色の表記の順番： </span>
+    <span>・（HSL色空間を使用時）色の表記の順番： </span>
     <select id="hsl-or-hls">
         <option value="HSL">H-S-L</option>
         <option value="HLS">H-L-S</option>
     </select>
 
     <br><br>
-    <span>ポップアップのサイズ:  </span>
+    <span>・ポップアップのサイズ： </span>
     <input id="popup-size" type="number" value="250" min="1">
     <span>px</span>
 
     <br><br>
     <div id="status"></div>
-    <button id="save">Save</button>
+    <button id="save">保存</button>
 
     <script src="../js/options.js"></script>
 </div>
