@@ -601,7 +601,12 @@ function RGBtoHSVorHSL(rgba,colorSpace) {
         h = Math.round((r - g) / (max - min) * 60 + 240);
     }
     if (colorSpace == 'HSV'){
-        let s = Math.round((max - min) / max * 100);
+        let s;
+        if (max == 0) {
+            s = 0;
+        } else {
+            s = Math.round((max - min) / max * 100);
+        }
         let v = Math.round(max / 255 * 100);
         let hsv = [h,s,v];
         // console.log("hsv = " + hsv);
@@ -609,12 +614,16 @@ function RGBtoHSVorHSL(rgba,colorSpace) {
     } else {
         let l = Math.round((max + min) / 2 * 100 / 255);
         let s2;
-        if (l < 50) {
-            s2 = Math.round((max - min) / (max + min) * 100);
-        } else if (l < 99) {
-            s2 = Math.round((max - min) / (510 - (max + min)) * 100);
+        if (max == 0){
+            s2 = 0;
         } else {
-            s2 = 100;
+            if (l < 50) {
+                s2 = Math.round((max - min) / (max + min) * 100);
+            } else if (l < 99) {
+                s2 = Math.round((max - min) / (510 - (max + min)) * 100);
+            } else {
+                s2 = 100;
+            }
         }
         let hsl = [h,s2,l];
         // console.log("hsl = " + hsl);
