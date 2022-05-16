@@ -1,6 +1,6 @@
 .screen-shot{
     overflow: hidden;
-    z-index: 2147483645;
+    z-index: 2147483644;
     position: fixed;
     width: 100vw;
     height: 100vh;
@@ -11,7 +11,7 @@
 }
 
 .mouse-tracker {
-    z-index: 2147483646;
+    z-index: 2147483645;
     position: fixed;
     pointer-events: none;
     background-color: rgb(255,255,255);
@@ -20,9 +20,29 @@
 .collapse-button {
     text-align: center;
     position: fixed;
-    top: 0;
-    right: 0;
-    background-color: rgba(0,0,0,0.8);
+    background-color: rgba(64,64,64,0.8);
+    color: #fff;
+    display: none;
+    z-index: 2147483646;
+    font-size: 35px;
+    line-height: 35px;
+    cursor: pointer;
+    user-select: none;
+}
+.collapse-button:hover {
+    background-color: rgba(128,128,128,0.8);
+}
+.collapse-button:active {
+    background-color: rgba(64,64,64,0.8);
+}
+
+
+.clipboard {
+    text-align: center;
+    position: fixed;
+    background-color: rgba(64,64,64,0.8);
+    background-image: url('chrome-extension://__MSG_@@extension_id__/images/clip.png');
+    background-size: contain;
     color: #fff;
     display: none;
     z-index: 2147483647;
@@ -31,6 +51,13 @@
     cursor: pointer;
     user-select: none;
 }
+.clipboard:hover {
+    background-color: rgba(128,128,128,0.8);
+}
+.clipboard:active {
+    background-color: rgba(64,64,64,0.8);
+}
+
 
 .color-circle-container {
     top: 0px;

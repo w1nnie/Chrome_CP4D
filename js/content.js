@@ -17,6 +17,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     colorInfo.style.backgroundColor = 'rgba(0,0,0,1)';
     document.body.appendChild(colorInfo);
 
+    // 終了ボタン
     let collapseButton = document.createElement('div');
     collapseButton.className = 'collapse-button';
     collapseButton.textContent = '×';
@@ -24,6 +25,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     collapseButton.style.height = '35px';
     document.body.appendChild(collapseButton);
 
+    // クリップボードボタン
+    let clipboard = document.createElement('div');
+    clipboard.className = 'clipboard';
+    clipboard.style.width = '35px';
+    clipboard.style.height = '35px';
+    document.body.appendChild(clipboard);
+
+    // optionで設定したサイズを処理
     size = parseInt(request.popupSize);
     if(isNaN(size)){size = 250;}
     colorValueHeight = parseInt(size/6);
@@ -144,8 +153,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         }
     }
 
-
-
+    // 探索モード<->固定モード の制御
     let clickCount = 0;
     debounce = _.debounce((e)=>updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircleContainer, valueMode, isHSV, HSLorHLS),1);
     window.addEventListener('mousemove', debounce);
@@ -156,19 +164,27 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             window.removeEventListener('mousemove', debounce);
             colorInfo.style.opacity = 0.6;
             collapseButton.style.display = 'inline';
+            clipboard.style.display = 'inline';
         } else {
             window.addEventListener('mousemove', debounce);
             colorInfo.style.opacity = 1;
             collapseButton.style.display = 'none';
+            clipboard.style.display = 'none';
         }
     });
+ 
+    // クリップボード
+    clipboardEvent = e => copyToClipboard(e,valueModeText(valueMode, HSLorHLS, imageData));
+    clipboard.addEventListener("click",clipboardEvent);
 
-    // escキーでdomを削除
+
+    // escキーまたは終了ボタンで終了処理
     quitEvent = e => quit(e);
     window.addEventListener("keyup",quitEvent);
     collapseButton.addEventListener("click",quitEvent);
 
-
+    sendResponse();
+    return;
 });
 
 
@@ -181,14 +197,24 @@ function quit(e){
         b = document.body.getElementsByClassName("mouse-tracker");
         c = document.body.getElementsByClassName("screen-shot");
         d = document.body.getElementsByClassName("collapse-button");
+        e = document.body.getElementsByClassName("clipboard");
         document.body.removeChild(a[0]);
         document.body.removeChild(b[0]);
         document.body.removeChild(c[0]);
         document.body.removeChild(d[0]);
+        document.body.removeChild(e[0]);
         window.removeEventListener("keyup",quitEvent);
         collapseButton.removeEventListener("click",quitEvent);
     }
 }
+
+// クリップボードにコピー
+function copyToClipboard(e,text){
+    if (e.type == "click") {
+        navigator.clipboard.writeText(text);
+    }
+}
+
 
 // マウスの移動によって描画を更新
 function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircleContainer, valueMode, isHSV, HSLorHLS) {
@@ -207,32 +233,41 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
     colorValue = colorCircleContainer.getElementsByClassName('color-value')[0];
     colorValue.textContent = valueModeText(valueMode, HSLorHLS, imageData);
     collapseButton = document.getElementsByClassName('collapse-button')[0];
+    clipboard = document.getElementsByClassName('clipboard')[0];
 
     magnifier(mousePos, ctx);
     magnifierPopupSize = 236;
-    collapseButtonSize = 35;
+    buttonSize = 35;
     borderX = window.innerWidth - magnifierPopupSize - 30;
     borderY = window.innerHeight - magnifierPopupSize - 30;
     if (mousePos.x > borderX && mousePos.y < borderY) {
         colorInfo.style.top = (mousePos.y + 10) + "px";
         colorInfo.style.left = (mousePos.x - 10 - magnifierPopupSize) + "px";
         collapseButton.style.top = (mousePos.y + 10) + "px";
-        collapseButton.style.left = (mousePos.x - 10 - collapseButtonSize) +"px"
+        collapseButton.style.left = (mousePos.x - 10 - buttonSize) +"px"
+        clipboard.style.top = (mousePos.y + 10) + "px";
+        clipboard.style.left = (mousePos.x - 10 - buttonSize * 2) +"px"
     } else if (mousePos.x < borderX && mousePos.y > borderY) {
         colorInfo.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
         colorInfo.style.left = (mousePos.x + 10) + "px";
         collapseButton.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
-        collapseButton.style.left = (mousePos.x + 10 + magnifierPopupSize - collapseButtonSize) + "px";
+        collapseButton.style.left = (mousePos.x + 10 + magnifierPopupSize - buttonSize) + "px";
+        clipboard.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
+        clipboard.style.left = (mousePos.x + 10 + magnifierPopupSize - buttonSize * 2) + "px";
     } else if (mousePos.x > borderX && mousePos.y > borderY) {
         colorInfo.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
         colorInfo.style.left = (mousePos.x - 10 - magnifierPopupSize) + "px";
         collapseButton.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
-        collapseButton.style.left = (mousePos.x - 10 - collapseButtonSize) + "px";
+        collapseButton.style.left = (mousePos.x - 10 - buttonSize) + "px";
+        clipboard.style.top = (mousePos.y - 10 - magnifierPopupSize) + "px";
+        clipboard.style.left = (mousePos.x - 10 - buttonSize * 2) + "px";
     } else {
         colorInfo.style.top = (mousePos.y + 10) + "px";
         colorInfo.style.left = (mousePos.x + 10) + "px";
         collapseButton.style.top = (mousePos.y + 10) + "px";
-        collapseButton.style.left = (mousePos.x + 10 + magnifierPopupSize - collapseButtonSize) + "px";
+        collapseButton.style.left = (mousePos.x + 10 + magnifierPopupSize - buttonSize) + "px";
+        clipboard.style.top = (mousePos.y + 10) + "px";
+        clipboard.style.left = (mousePos.x + 10 + magnifierPopupSize - buttonSize * 2) + "px";
     }
 
     if (isHSV) {
@@ -359,7 +394,7 @@ function draw(canvas,imagePath,ctx) {
         canvas.width = image.naturalWidth;
         canvas.height = image.naturalHeight;
         ctx.drawImage(image, 0, 0);
-        console.log("load!");
+        // console.log("load!");
     });
     image.src = imagePath;
 }

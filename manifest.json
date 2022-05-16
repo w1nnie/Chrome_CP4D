@@ -2,11 +2,11 @@
     "manifest_version": 3,
     "name": "ColorPicker with ColorCircle",
     "description": "取得した色のカラーサークル上の位置がわかるカラーピッカーです。",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "icons": {
-        "16": "image/16.png",
-        "48": "image/48.png",
-        "128": "image/128.png"
+        "16": "images/16.png",
+        "48": "images/48.png",
+        "128": "images/128.png"
     },
     "content_scripts": [{
         "matches": ["<all_urls>"],
@@ -18,7 +18,7 @@
     },
     "options_page": "html/options.html",
     "action": {
-        "default_icon": "image/48.png"
+        "default_icon": "images/48.png"
     },
     "permissions": [
         "background",
@@ -27,7 +27,7 @@
     ],
     "web_accessible_resources": [
         {
-            "resources": ["/js/*"],
+            "resources": ["/js/*","/images/clip.png"],
             "matches": ["<all_urls>"]
         }
     ]

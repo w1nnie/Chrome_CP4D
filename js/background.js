@@ -31,16 +31,15 @@ chrome.action.onClicked.addListener(function(tab) {
     });
 });
 
-chrome.runtime.onMessage.addListener(
-	function(request,sender,sendResponse){
-        if (request == "activated") {
-            chrome.action.disable();
-        }
-        if (request == "quit") {
-            chrome.action.enable();
-        }
-	}
-);
+chrome.runtime.onMessage.addListener(function(request,sender,sendResponse){
+    if (request == "activated") {
+        chrome.action.disable();
+    }
+    if (request == "quit") {
+        chrome.action.enable();
+    }
+    return true;
+});
 
 chrome.tabs.onUpdated.addListener(function(){
     chrome.action.enable();
