@@ -83,6 +83,9 @@
 .color-value:hover {
     background-color: rgba(255,255,255,0.1);
 }
+.color-value:active {
+    background-color: #555;
+}
 
 .color-circle {
     top: 0px;
@@ -92,6 +95,9 @@
 }
 .color-circle:hover {
     background-color: rgba(255,255,255,0.05);
+}
+.color-circle:active{
+    background-color: rgba(0,0,0,0.05);
 }
 
 .color-circle {
