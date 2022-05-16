@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "ColorPicker with ColorCircle",
+    "name": "Color Circle Picker",
     "description": "取得した色のカラーサークル上の位置がわかるカラーピッカーです。",
     "version": "1.0.1",
     "icons": {
