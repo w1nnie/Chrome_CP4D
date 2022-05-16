@@ -2,6 +2,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
     // 二度押しの禁止
     chrome.runtime.sendMessage("activated");
+    sendResponse();
+
 
     // canvasを作りbackground.jsから受け取ったimagePathを流し込み、domへ追加(全面にスクショ画像を表示)
     let canvas = document.createElement('canvas');
@@ -283,6 +285,7 @@ function updateColorCircle(e, ctx, colorInfo, ctxDHSV, ctxDHSL, size, colorCircl
     
 }
 
+// 色空間・表示モードに沿ったテキストを生成
 function valueModeText(valueMode, HSLorHLS, imageData) {
     let text;
     r = imageData.data[0];
@@ -412,11 +415,12 @@ function drawOuterColorCircle(ctx,size) {
     let center = new Object();
     center.x = size / 2;
     center.y = size / 2;
-    
+    offsetAngle = Math.PI * 1/6;
     rad = size/2*0.9;
-    offsetAngle = Math.PI * 1/16;
     ax = Math.round(Math.cos(Math.PI * 1/3) * rad * 1000) / 1000;
     ay = Math.round(Math.sin(Math.PI * 1/3) * rad * 1000) / 1000;
+    // ax = Math.sin(Math.PI * 1/3) * rad;
+    // ay = Math.sin(Math.PI * 1/3) * rad;
     let trirants = [
         {
             "angleStart": Math.PI,
@@ -493,22 +497,26 @@ function drawOuterColorCircle(ctx,size) {
     ]
     for (let i = 0; i < trirants.length; i++) {
         let tri = trirants[i];
-        // console.log(tri.x1 + ", " + tri.y1 + ", " + tri.x2 + ", " + tri.y2);
         let grad = ctx.createLinearGradient(tri.x1, tri.y1, tri.x2, tri.y2);
         for (let j = 0; j < tri.colorStops.length; j++) {
             let cs = tri.colorStops[j];
             grad.addColorStop(cs.stop, cs.color);
         }
+ 
         ctx.beginPath();
-        // console.log(center.x, center.y, rad, tri.angleStart, tri.angleEnd);
+
+        // offsetAngleだけ色相環を回転
+        ctx.translate(center.x,center.y);
+        ctx.rotate(offsetAngle);
+        ctx.translate(-center.x,-center.y);
+
         ctx.arc(center.x, center.y, rad, tri.angleStart, tri.angleEnd);
         ctx.strokeStyle = grad;
         ctx.lineWidth = size/15;
-        // ctx.translate(center.x,center.y);
-        // ctx.rotate(offsetAngle);
-        // ctx.translate(-center.x,-center.y);
         ctx.stroke();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
+
 }
 
 // 外輪のプロットの描画
