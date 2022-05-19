@@ -66,7 +66,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     let ctxSHSV = staticColorCircleHSV.getContext('2d');
     drawOuterColorCircle(ctxSHSV, size)
 
-    // HSVの動的エレメント(内部, プロット)
+    // HSVの動的エレメント(内部, カーソル)
     let dynamicColorCircleHSV = document.createElement('canvas');
     dynamicColorCircleHSV.className = 'color-circle';
     dynamicColorCircleHSV.style = 'position: absolute; top: 0; left: 0;';
@@ -86,7 +86,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     let ctxSHSL = staticColorCircleHSL.getContext('2d');
     // drawOuterColorCircle(ctxSHSL, size)
 
-    // HSLの動的エレメント(内部, プロット)
+    // HSLの動的エレメント(内部, カーソル)
     let dynamicColorCircleHSL = document.createElement('canvas');
     dynamicColorCircleHSL.className = 'color-circle';
     dynamicColorCircleHSL.style = 'position: absolute; top: 0; left: 0;';
@@ -519,8 +519,9 @@ function drawOuterColorCircle(ctx,size) {
 
 }
 
-// 外輪のプロットの描画
+// 外輪のカーソルの描画
 function drawOuterColorCirclePoint(ctx, size, rgba) {
+    let offsetAngle = Math.PI * 1/6;
     let center = new Object();
     center.x = size / 2;
     center.y = size / 2;
@@ -528,12 +529,16 @@ function drawOuterColorCirclePoint(ctx, size, rgba) {
     rad = size/2*0.9;
     hsv = RGBtoHSVorHSL(rgba, 'HSV');
     ctx.beginPath();
+    ctx.translate(center.x,center.y);
+    ctx.rotate(offsetAngle);
+    ctx.translate(-center.x,-center.y);
     ctx.arc(center.x + rad * Math.cos(((hsv[0] / 180 + 1) % 2) * Math.PI), center.y + rad * Math.sin(((hsv[0] / 180 + 1) % 2) * Math.PI), size/30, 0, 2 * Math.PI);
     ctx.strokeStyle = 'rgb(255,255,255)';
     ctx.stroke();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-// 内四角のプロットの描画
+// 内四角のカーソルの描画
 function drawInnerColorCircleHSVPoint(ctx, size, rgba) {
     let center = new Object();
     center.x = size / 2;
@@ -548,7 +553,7 @@ function drawInnerColorCircleHSVPoint(ctx, size, rgba) {
     ctx.stroke();
 }
 
-// 内三角のプロットの描画
+// 内三角のカーソルの描画
 function drawInnerColorCircleHSLPoint(ctx, size, rgba) {
     let center = new Object();
     center.x = size / 2;
